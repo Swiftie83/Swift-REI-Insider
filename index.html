@@ -1,0 +1,365 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  Users, DollarSign, FileText, TrendingUp, ShieldAlert, CheckSquare, 
+  Layers, BarChart3, Plus, Edit3, Trash2, CheckCircle2, AlertTriangle, 
+  Briefcase, Send, MapPin, EyeOff
+} from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+// ==========================================
+// 1. TYPES & INTERFACES
+// ==========================================
+export type UserRole = 
+  | 'Admin' 
+  | 'Lead Manager' 
+  | 'Acquisitions Manager' 
+  | 'Dispo Manager' 
+  | 'Transaction Coordinator' 
+  | 'VA';
+
+export type LeadSource =
+  | 'Cold Calling'
+  | 'SMS'
+  | 'PPC'
+  | 'Facebook'
+  | 'Referral'
+  | 'Driving for Dollars'
+  | 'PropWire'
+  | 'BatchLeads'
+  | 'JV Partner';
+
+export type LeadStatus =
+  | 'New Lead'
+  | 'Qualified'
+  | 'Appointment'
+  | 'Offer Sent'
+  | 'Under Contract'
+  | 'In Title'
+  | 'Closed'
+  | 'Dead/Lost';
+
+export type PropertyType = 'Single Family' | 'Multi-Family' | 'Condo' | 'Commercial';
+
+export interface Lead {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  property_type: PropertyType;
+  bedrooms: number;
+  bathrooms: number;
+  arv?: number;
+  estimated_repairs?: number;
+  wholesale_fee?: number; 
+  is_seller_finance?: boolean;
+  lead_source: LeadSource;
+  status: LeadStatus;
+  assigned_to: string;
+  follow_up_date: string;
+  notes: string;
+  created_at: string;
+}
+
+export interface Deal {
+  id: string;
+  lead_id: string;
+  address: string;
+  contract_price: number;
+  assignment_price: number;
+  wholesale_fee: number;
+  profit: number;
+  status: 'Under Contract' | 'In Title' | 'Closed';
+  closing_date: string;
+  contract_signed_date: string;
+  emd_received: boolean;
+  emd_date?: string;
+  title_opened: boolean;
+  title_date?: string;
+  buyer_name?: string;
+  commission_owed: number;
+  split_ratio: string;
+  checklist: {
+    open_title: boolean;
+    send_contract: boolean;
+    request_photos: boolean;
+    obtain_payoff: boolean;
+    coordinate_buyer: boolean;
+    confirm_closing: boolean;
+    collect_hud: boolean;
+  };
+}
+
+export interface MarketingCampaign {
+  id: string;
+  property_id: string;
+  address: string;
+  timeline: {
+    day1_text: { status: 'Pending' | 'Done'; notes: string };
+    day2_email: { status: 'Pending' | 'Done'; notes: string };
+    day3_fb: { status: 'Pending' | 'Done'; notes: string };
+    day4_outreach: { status: 'Pending' | 'Done'; notes: string };
+    day5_followup: { status: 'Pending' | 'Done'; notes: string };
+  };
+}
+
+export interface TeamMemberPerformance {
+  id: string;
+  name: string;
+  role: string;
+  leads_handled: number;
+  contracts_signed: number;
+  revenue_generated: number;
+  appointments_set: number;
+  offers_sent: number;
+}
+
+// ==========================================
+// 2. MOCK DATA SEED
+// ==========================================
+const initialLeads: Lead[] = [
+  {
+    id: 'L-101',
+    name: 'John Doe',
+    phone: '555-0192',
+    address: '123 Main St',
+    city: 'Phoenix',
+    state: 'AZ',
+    property_type: 'Single Family',
+    bedrooms: 3,
+    bathrooms: 2,
+    arv: 300000,
+    estimated_repairs: 40000,
+    wholesale_fee: 15000,
+    lead_source: 'Cold Calling',
+    status: 'In Title',
+    assigned_to: 'Will',
+    follow_up_date: '2026-06-10',
+    notes: 'Motivated seller out of state. Wants quick closing.',
+    created_at: '2026-04-15'
+  },
+  {
+    id: 'L-102',
+    name: 'Sarah Jenkins',
+    phone: '555-0143',
+    address: '456 Oak Ave',
+    city: 'Dallas',
+    state: 'TX',
+    property_type: 'Single Family',
+    bedrooms: 2, // Subject to 2-Bedroom SF Kill Rule
+    bathrooms: 1,
+    arv: 180000,
+    estimated_repairs: 20000,
+    wholesale_fee: 10000,
+    lead_source: 'SMS',
+    status: 'New Lead',
+    assigned_to: 'Kayden',
+    follow_up_date: '2026-06-05',
+    notes: 'Inherited property. Reviewing 2-bed conversion feasibility.',
+    created_at: '2026-06-01'
+  },
+  {
+    id: 'L-103',
+    name: 'Robert Smith',
+    phone: '555-0188',
+    address: '789 Pine Rd',
+    city: 'Atlanta',
+    state: 'GA',
+    property_type: 'Single Family',
+    bedrooms: 4,
+    bathrooms: 2.5,
+    arv: 450000,
+    estimated_repairs: 65000,
+    wholesale_fee: 25000,
+    is_seller_finance: true, // Custom Submission Parameters: Principal-Only Payments
+    lead_source: 'Referral',
+    status: 'Offer Sent',
+    assigned_to: 'Will',
+    follow_up_date: '2026-06-06',
+    notes: 'Seller open to creative terms. Principal-Only payments setup.',
+    created_at: '2026-05-10'
+  },
+  {
+    id: 'L-104',
+    name: 'Alice Johnson',
+    phone: '555-0211',
+    address: '901 Maple Blvd',
+    city: 'Orlando',
+    state: 'FL',
+    property_type: 'Multi-Family',
+    bedrooms: 6,
+    bathrooms: 4,
+    lead_source: 'PPC',
+    status: 'Appointment',
+    assigned_to: 'Kayden',
+    follow_up_date: '2026-06-08',
+    notes: 'Duplex showing high visual distress. Appointment confirmed.',
+    created_at: '2026-05-28'
+  }
+];
+
+const initialDeals: Deal[] = [
+  {
+    id: 'D-201',
+    lead_id: 'L-101',
+    address: '123 Main St',
+    contract_price: 110000,
+    assignment_price: 125000,
+    wholesale_fee: 15000,
+    profit: 15000,
+    status: 'In Title',
+    closing_date: '2026-06-28',
+    contract_signed_date: '2026-05-28',
+    emd_received: true,
+    emd_date: '2026-05-30',
+    title_opened: true,
+    title_date: '2026-05-29',
+    buyer_name: 'Alpha Holdings LLC',
+    commission_owed: 7500,
+    split_ratio: '50/50',
+    checklist: {
+      open_title: true,
+      send_contract: true,
+      request_photos: true,
+      obtain_payoff: false,
+      coordinate_buyer: true,
+      confirm_closing: false,
+      collect_hud: false
+    }
+  }
+];
+
+const initialCampaigns: MarketingCampaign[] = [
+  {
+    id: 'MC-301',
+    property_id: 'L-103',
+    address: '789 Pine Rd',
+    timeline: {
+      day1_text: { status: 'Done', notes: 'Sent to tier 1 VIP cash buyers.' },
+      day2_email: { status: 'Done', notes: 'Blast to complete metro list.' },
+      day3_fb: { status: 'Pending', notes: 'Schedule post for regional investment groups.' },
+      day4_outreach: { status: 'Pending', notes: '' },
+      day5_followup: { status: 'Pending', notes: '' }
+    }
+  }
+];
+
+const initialTeamPerformance: TeamMemberPerformance[] = [
+  { id: 'TM-1', name: 'Kayden', role: 'Acquisitions Manager', leads_handled: 50, contracts_signed: 5, revenue_generated: 25000, appointments_set: 14, offers_sent: 19 },
+  { id: 'TM-2', name: 'Will', role: 'Acquisitions Manager', leads_handled: 60, contracts_signed: 7, revenue_generated: 40000, appointments_set: 22, offers_sent: 28 }
+];
+
+// ==========================================
+// 3. MAIN DASHBOARD APPLICATION ENGINE
+// ==========================================
+export default function App() {
+  const [currentRole, setCurrentRole] = useState<UserRole>('Admin');
+  const [currentTab, setCurrentTab] = useState<string>('home');
+  const [leads, setLeads] = useState<Lead[]>(initialLeads);
+  const [deals, setDeals] = useState<Deal[]>(initialDeals);
+  const [team, setTeam] = useState<TeamMemberPerformance[]>(initialTeamPerformance);
+  const [campaigns, setCampaigns] = useState<MarketingCampaign[]>(initialCampaigns);
+
+  // Form Modal Context Bounds
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [leadForm, setLeadForm] = useState<Partial<Lead>>({
+    name: '', phone: '', address: '', city: '', state: 'AZ', property_type: 'Single Family',
+    bedrooms: 3, bathrooms: 2, arv: 0, estimated_repairs: 0, wholesale_fee: 0,
+    lead_source: 'Cold Calling', status: 'New Lead', assigned_to: 'Will', notes: '', follow_up_date: '2026-06-15'
+  });
+
+  // Role-Based Access Control Filtering
+  const canAccessSection = (tab: string): boolean => {
+    if (currentRole === 'Admin') return true;
+    switch(tab) {
+      case 'home': return ['Lead Manager', 'Acquisitions Manager', 'VA'].includes(currentRole);
+      case 'reports': return ['Lead Manager', 'Acquisitions Manager'].includes(currentRole);
+      case 'acquisitions': return ['Acquisitions Manager'].includes(currentRole);
+      case 'dispo': return ['Dispo Manager'].includes(currentRole);
+      case 'transaction': return ['Transaction Coordinator'].includes(currentRole);
+      case 'financials': return false; // Strictly Admin
+      default: return false;
+    }
+  };
+
+  // Custom ARV Calculation Formula Execution
+  const calculateFormulaOffer = (arv: number, repairs: number, fee: number, bufferPercent: number = 12) => {
+    const base = arv * 0.60;
+    const buffer = arv * (bufferPercent / 100);
+    return Math.max(0, base - repairs - fee - buffer);
+  };
+
+  const handleSaveLead = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentRole === 'VA' && leadForm.status !== 'New Lead') {
+      alert('Access Denied: VAs can only instantiate leads in "New Lead" status.');
+      return;
+    }
+
+    if (editingLead) {
+      setLeads(leads.map(l => l.id === editingLead.id ? { ...l, ...leadForm } as Lead : l));
+    } else {
+      const newLead: Lead = {
+        ...(leadForm as Lead),
+        id: `L-${Date.now().toString().slice(-3)}`,
+        created_at: new Date().toISOString().split('T')[0]
+      };
+      setLeads([newLead, ...leads]);
+    }
+    setIsLeadModalOpen(false);
+    setEditingLead(null);
+  };
+
+  const handleDeleteLead = (id: string) => {
+    if (confirm('Confirm permanent deletion of lead file?')) {
+      setLeads(leads.filter(l => l.id !== id));
+    }
+  };
+
+  const triggerEditModal = (lead: Lead) => {
+    if (currentRole === 'VA') {
+      alert('Access Denied: VAs do not possess system edit clearance.');
+      return;
+    }
+    setEditingLead(lead);
+    setLeadForm(lead);
+    setIsLeadModalOpen(true);
+  };
+
+  const globalKPIs = useMemo(() => {
+    return {
+      totalLeads: 1250, 
+      newLeadsMonth: 85,
+      underContract: leads.filter(l => l.status === 'Under Contract').length + 12,
+      inTitle: deals.filter(d => d.status === 'In Title').length + 6,
+      closedDeals: 22,
+      grossProfit: 118500,
+      avgAssignmentFee: 5386,
+      lostDeals: 17
+    };
+  }, [leads, deals]);
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans antialiased">
+      {/* GLOBAL HEADER & ROLE SWITCHER */}
+      <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex flex-wrap justify-between items-center gap-4">
+        <div className="flex items-center space-x-3">
+          <div className="bg-emerald-500 text-slate-950 p-2 rounded-lg font-black tracking-wider text-xl">RE</div>
+          <div>
+            <h1 className="text-lg font-bold tracking-tight">ApexEstate CRM</h1>
+            <p className="text-xs text-slate-400 font-mono">Unified Real Estate Node • 2026 Edition</p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-3 bg-slate-900 p-2 rounded-xl border border-slate-800">
+          <label className="text-xs uppercase font-mono font-bold tracking-wider text-slate-400 flex items-center gap-1.5">
+            <Users size={14} className="text-emerald-400" /> Identity Scope:
+          </label>
+          <select 
+            value={currentRole}
+            onChange={(e) => {
+              const selectedRole = e.target.value as UserRole;
+              setCurrentRole(selectedRole);
+              if (selected
