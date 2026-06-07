@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Swift REI Insider™ | Enterprise CRM Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -101,6 +101,14 @@
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; width: 90%; max-width: 620px; padding: 2rem; position: relative; max-height: 90vh; overflow-y: auto; }
         .close-modal { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); cursor: pointer; }
+
+        /* --- ADMIN ROSTER GRID --- */
+        .admin-roster-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .roster-card { background: var(--bg-card); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border); }
+        .roster-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .roster-list-item:last-child { border-bottom: none; }
+        .btn-delete-operator { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 2px; }
+        .btn-delete-operator:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -251,30 +259,33 @@
 
         <section id="view-admin" class="view-section">
             <h2>System Administration & Security Console</h2>
-            <div class="panel-card" style="max-width: 600px;">
-                <h3>Register Internal Company Manager Profile</h3><br>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                    <div class="form-group">
-                        <label>Personnel Full Name</label>
-                        <input type="text" id="admin-manager-name" placeholder="Alex Mercer">
-                    </div>
-                    <div class="form-group">
-                        <label>Functional Operational Profile Role Tier</label>
-                        <select id="admin-manager-role">
-                            <option value="leadManager">Lead Manager (LM)</option>
-                            <option value="acqManager">Acquisitions Manager (AM)</option>
-                            <option value="dispoManager">Disposition Manager (DM)</option>
-                            <option value="transCoordinator">Transaction Coordinator (TC)</option>
-                        </select>
-                    </div>
-                </div>
-                <button style="background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; cursor:pointer; width:100%; font-weight:600;" onclick="addNewManagerToDatabase()">Write Corporate Manager Assignment Profile</button>
-            </div>
             
-            <div class="panel-card" style="max-width: 600px; border-color: var(--danger);">
-                <h3 style="color: var(--danger);">Active Operational Roster Control</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Complete real-time deployment map of active team staff across tracking roles.</p>
-                <div id="admin-roster-display" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; max-width: 900px;">
+                <div class="panel-card">
+                    <h3>Register Internal Company Manager Profile</h3><br>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label>Personnel Full Name</label>
+                            <input type="text" id="admin-manager-name" placeholder="Alex Mercer">
+                        </div>
+                        <div class="form-group">
+                            <label>Functional Operational Profile Role Tier</label>
+                            <select id="admin-manager-role">
+                                <option value="leadManager">Lead Manager (LM)</option>
+                                <option value="acqManager">Acquisitions Manager (AM)</option>
+                                <option value="dispoManager">Disposition Manager (DM)</option>
+                                <option value="transCoordinator">Transaction Coordinator (TC)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button style="background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; cursor:pointer; width:100%; font-weight:600;" onclick="addNewManagerToDatabase()">Write Corporate Manager Assignment Profile</button>
+                </div>
+
+                <div class="panel-card">
+                    <h3>Active Database Personnel Profiles</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Manage and remove company agents or test names from system registers.</p>
+                    <div class="admin-roster-grid" id="admin-roster-display"></div>
+                </div>
             </div>
         </section>
     </main>
@@ -295,7 +306,7 @@
                     <label>Seller Full Name</label>
                     <input type="text" id="lead-seller-name" placeholder="John Doe">
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom: 0.5rem;">
                     <div class="form-group">
                         <label>Seller Phone Connection</label>
                         <input type="tel" id="lead-seller-phone" placeholder="(555) 000-0000">
@@ -321,8 +332,10 @@
                 <div class="form-group">
                     <label>Market Target Region Area</label>
                     <select id="lead-market" onchange="runLiveUnderwritingCalculation()">
-                        <option value="Standard">Standard Market Area (60% MAO)</option>
-                        <option value="California">California Hot Market (80% MAO)</option>
+                        <option value="50% Region">50% Nationwide Region (50% MAO)</option>
+                        <option value="60% Region" selected>60% Nationwide Region (60% MAO)</option>
+                        <option value="70% Region">70% Nationwide Region (70% MAO)</option>
+                        <option value="80% Region">80% Nationwide Region (80% MAO)</option>
                     </select>
                 </div>
             </div>
@@ -399,6 +412,7 @@
                 <div><label>Calculated Target MAO</label> <strong id="modal-deal-mao" style="color:var(--warning); font-size:1.05rem;">-</strong></div>
             </div>
 
+            <!-- DYNAMIC REASSIGNMENT DESK MATRIX -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
                 <div class="form-group">
                     <label>Reassign Lead Manager (LM)</label>
@@ -431,4 +445,553 @@
             </div>
 
             <div style="display:flex; gap:0.5rem; justify-content:flex-end; border-top:1px solid var(--border); padding-top:1.25rem; flex-wrap: wrap;">
-                <button style="background:var(--danger); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500; margin-right: auto;" id="modal-btn-delete" onclick="deleteActiveLeadFile()"><i data-lucide="trash-
+                <button style="background:var(--danger); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500; margin-right: auto;" id="modal-btn-delete" onclick="deleteActiveLeadFile()"><i data-lucide="trash-2" style="display:inline; width:14px; vertical-align:middle; margin-right:3px;"></i> Delete Lead</button>
+                <button style="background:#4b5563; color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" onclick="closeModal('deal-modal')">Cancel</button>
+                <button style="background:var(--danger); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="btn-move-back" onclick="adjustPipelineDirection(-1)"><i data-lucide="arrow-left" style="display:inline; width:14px; vertical-align:middle; margin-right:3px;"></i> Move Stage Back</button>
+                <button style="background:var(--primary); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="btn-move-forward" onclick="adjustPipelineDirection(1)">Advance Stage <i data-lucide="arrow-right" style="display:inline; width:14px; vertical-align:middle; margin-left:3px;"></i></button>
+                <button style="background:var(--accent); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="modal-btn-save" onclick="saveLeadManagerAssignments()">Save Sheet Changes</button>
+                <button style="background:var(--accent); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="modal-btn-email" onclick="generateOfferEmail()">Copy Offer Script</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Structural Management Rosters Data Matrix
+        let managementRoster = {
+            leadManager: ["Sarah Jenkins", "Marcus Vance"],
+            acqManager: ["David Ross", "Elena Rostova"],
+            dispoManager: ["Chris Gable", "Brett Fowler"],
+            transCoordinator: ["Tanya Cross", "Kristi Vance"]
+        };
+
+        // Granular Performance Metric Tracking Storage System
+        let metricLedgerData = {
+            leadManager: {
+                "Sarah Jenkins": { f1: 450, f2: 120, f3: 45 },
+                "Marcus Vance": { f1: 380, f2: 95, f3: 32 }
+            },
+            acqManager: {
+                "David Ross": { f1: 18, f2: 64, f3: 5 },
+                "Elena Rostova": { f1: 22, f2: 80, f3: 8 }
+            },
+            dispoManager: {
+                "Chris Gable": { f1: 14, f2: 25, f3: 4 },
+                "Brett Fowler": { f1: 9, f2: 18, f3: 2 }
+            },
+            transCoordinator: {
+                "Tanya Cross": { f1: 6, f2: 6, f3: 5 },
+                "Kristi Vance": { f1: 4, f2: 4, f3: 4 }
+            }
+        };
+
+        // Static Property Leads Tracking Base Data Arrays
+        let leads = [
+            { id: 1, address: "1428 Elm St, Detroit MI", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "", market: "60% Region", lm: "Sarah Jenkins", am: "David Ross", dm: "Unassigned", tc: "Unassigned", source: "Pre-Foreclosure", arv: 140000, repairs: 25000, wholesale: 12500, buffer: 17500, mao: 29000, stage: "new", propType: "Single Family", beds: "3", dispoNotes: "" },
+            { id: 2, address: "992 Texas Ave, Houston TX", sellerName: "Maria Gonzales", sellerPhone: "(713) 555-8831", sellerEmail: "mgonz81@yahoo.com", titleCompany: "Lone Star Escrow Services", market: "60% Region", lm: "Marcus Vance", am: "Elena Rostova", dm: "Chris Gable", tc: "Tanya Cross", source: "Tax Lien", arv: 220000, repairs: 30000, wholesale: 15000, buffer: 27500, mao: 60000, stage: "closed", propType: "Single Family", beds: "3", dispoNotes: "" },
+            { id: 3, address: "4412 Citrus Dr, Tampa FL", sellerName: "Arthur Pendelton", sellerPhone: "(813) 555-4402", sellerEmail: "artiep@outlook.com", titleCompany: "Suncoast Title Partners", market: "70% Region", lm: "Sarah Jenkins", am: "David Ross", dm: "Chris Gable", tc: "Kristi Vance", source: "Tired Landlord", arv: 310000, repairs: 45000, wholesale: 22000, buffer: 38750, mao: 111250, stage: "contract", propType: "Multi-Family", beds: "4+", dispoNotes: "Blasted out to clear tier-1 cash list buyers. Execution pending inspection walk." }
+        ];
+
+        const pipelineOrder = ['new', 'underwriting', 'offer', 'contract', 'closed'];
+        let activeSelectedLeadId = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            rebuildAllFormSelectorDropdowns();
+            renderPipeline();
+            renderPerformanceMetricsTables();
+            renderDispoDeskView();
+            renderAdminRosterProfiles();
+            toggleMetricInputs();
+            runLiveUnderwritingCalculation();
+            document.getElementById("auth-screen").style.display = "none";
+            document.getElementById("user-display-email").innerText = "admin-hq@swiftequity.com";
+            document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
+        });
+
+        // LIVE NATIONWIDE INSTITUTIONAL UNDERWRITING ENGINE
+        function runLiveUnderwritingCalculation() {
+            const arv = parseInt(document.getElementById("lead-arv").value) || 0;
+            const repairs = parseInt(document.getElementById("lead-repairs").value) || 0;
+            const wholesale = parseInt(document.getElementById("lead-wholesale").value) || 0;
+            const market = document.getElementById("lead-market").value;
+            
+            const buffer = Math.round(arv * 0.125);
+            document.getElementById("lead-buffer").value = buffer;
+
+            // Extract percentage directly out of the string (50%, 60%, 70%, 80%)
+            let marketPercentage = 0.60; 
+            if (market.includes("50%")) marketPercentage = 0.50;
+            else if (market.includes("60%")) marketPercentage = 0.60;
+            else if (market.includes("70%")) marketPercentage = 0.70;
+            else if (market.includes("80%")) marketPercentage = 0.80;
+
+            const mao = Math.round((arv * marketPercentage) - repairs - wholesale - buffer);
+            
+            const displayEl = document.getElementById("live-mao-display");
+            displayEl.innerText = mao > 0 ? `$${mao.toLocaleString()}` : "$0";
+            return { mao, buffer };
+        }
+
+        // REBUILD FORM DROP CHANNELS
+        function rebuildAllFormSelectorDropdowns() {
+            const forms = [
+                { id: "lead-lm-select", key: "leadManager" },
+                { id: "lead-am-select", key: "acqManager" },
+                { id: "modal-assign-lm", key: "leadManager" },
+                { id: "modal-assign-am", key: "acqManager" },
+                { id: "modal-assign-dm", key: "dispoManager" },
+                { id: "modal-assign-tc", key: "transCoordinator" }
+            ];
+            
+            forms.forEach(f => {
+                const select = document.getElementById(f.id);
+                if(select) {
+                    select.innerHTML = f.id.startsWith("modal-") ? `<option value="Unassigned">Leave Unassigned</option>` : "";
+                    managementRoster[f.key].forEach(person => {
+                        select.innerHTML += `<option value="${person}">${person}</option>`;
+                    });
+                }
+            });
+            
+            populateMetricTargetManagers();
+        }
+
+        function populateMetricTargetManagers() {
+            const roleKey = document.getElementById("metric-role-select").value;
+            const targetSelect = document.getElementById("metric-manager-name");
+            if (!targetSelect) return;
+            targetSelect.innerHTML = "";
+            managementRoster[roleKey].forEach(name => {
+                targetSelect.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        }
+
+        function toggleMetricInputs() {
+            const role = document.getElementById("metric-role-select").value;
+            const labels = {
+                leadManager: ["Inbound Phone Calls", "Outbound Contacts Sourced", "Leads Qualified"],
+                acqManager: ["Offers Dispatched", "Follow-ups Completed", "Contracts Secured Under Hook"],
+                dispoManager: ["Cash Buyer List Blasts", "Walkthroughs Scheduled", "Deals Fully Assigned"],
+                transCoordinator: ["EMD Escrow Audits", "Title Clearance Audits", "Closings Realized"]
+            };
+            
+            document.getElementById("lbl-field-1").innerText = labels[role][0];
+            document.getElementById("lbl-field-2").innerText = labels[role][1];
+            document.getElementById("lbl-field-3").innerText = labels[role][2];
+            document.getElementById("field-box-3").style.display = "block"; 
+            
+            populateMetricTargetManagers();
+        }
+
+        function addNewManagerToDatabase() {
+            const name = document.getElementById("admin-manager-name").value.trim();
+            const role = document.getElementById("admin-manager-role").value;
+            if(!name) { alert("Please supply a valid personnel identity name string."); return; }
+            
+            if(!managementRoster[role].includes(name)) {
+                managementRoster[role].push(name);
+                metricLedgerData[role][name] = { f1: 0, f2: 0, f3: 0 };
+                rebuildAllFormSelectorDropdowns();
+                renderPerformanceMetricsTables();
+                renderAdminRosterProfiles();
+                document.getElementById("admin-manager-name").value = "";
+                alert(`Personnel Profile recorded: "${name}" assigned inside ${role} tracking channels.`);
+            }
+        }
+
+        // DELETION ENGINE: ERASE SPECIFIC OPERATORS
+        function removeManagerFromDatabase(role, name) {
+            const confirmation = confirm(`Are you sure you want to completely remove "${name}" from the ${role} roster?\nThis will clear them from option drop-downs across the desk.`);
+            if (confirmation) {
+                // Pull out from roster
+                managementRoster[role] = managementRoster[role].filter(n => n !== name);
+                // Purge metrics tracking desk
+                if (metricLedgerData[role] && metricLedgerData[role][name]) {
+                    delete metricLedgerData[role][name];
+                }
+                
+                rebuildAllFormSelectorDropdowns();
+                renderPerformanceMetricsTables();
+                renderAdminRosterProfiles();
+                alert(`"${name}" successfully stripped from active configurations.`);
+            }
+        }
+
+        function renderAdminRosterProfiles() {
+            const container = document.getElementById("admin-roster-display");
+            if (!container) return;
+            container.innerHTML = "";
+
+            const roleLabels = {
+                leadManager: "Lead Managers (LM)",
+                acqManager: "Acquisitions (AM)",
+                dispoManager: "Dispositions (DM)",
+                transCoordinator: "Transaction (TC)"
+            };
+
+            Object.keys(managementRoster).forEach(roleKey => {
+                let card = document.createElement("div");
+                card.className = "roster-card";
+                card.innerHTML = `<h4 style="color:var(--accent); font-size:0.9rem; margin-bottom:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.25rem;">${roleLabels[roleKey]}</h4>`;
+                
+                let listContainer = document.createElement("div");
+                
+                if (managementRoster[roleKey].length === 0) {
+                    listContainer.innerHTML = `<div style="color:var(--text-muted); font-size:0.8rem; padding: 0.25rem 0;">No active personnel</div>`;
+                } else {
+                    managementRoster[roleKey].forEach(name => {
+                        listContainer.innerHTML += `
+                            <div class="roster-list-item">
+                                <span style="font-size:0.9rem; font-weight:500;">${name}</span>
+                                <button class="btn-delete-operator" onclick="removeManagerFromDatabase('${roleKey}', '${name}')">
+                                    <i data-lucide="user-x" style="width:14px; height:14px;"></i> Clear
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+                card.appendChild(listContainer);
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function submitRoleActivityMetrics() {
+            const role = document.getElementById("metric-role-select").value;
+            const name = document.getElementById("metric-manager-name").value;
+            const f1 = parseInt(document.getElementById("val-field-1").value) || 0;
+            const f2 = parseInt(document.getElementById("val-field-2").value) || 0;
+            const f3 = parseInt(document.getElementById("val-field-3").value) || 0;
+
+            if(!name) return;
+            if(!metricLedgerData[role][name]) { metricLedgerData[role][name] = { f1: 0, f2: 0, f3: 0 }; }
+
+            metricLedgerData[role][name].f1 += f1;
+            metricLedgerData[role][name].f2 += f2;
+            metricLedgerData[role][name].f3 += f3;
+
+            renderPerformanceMetricsTables();
+            document.getElementById("val-field-1").value = "0";
+            document.getElementById("val-field-2").value = "0";
+            document.getElementById("val-field-3").value = "0";
+            alert("Statistical records aggregated into live operations ledger.");
+        }
+
+        function renderPerformanceMetricsTables() {
+            const roles = ["leadManager", "acqManager", "dispoManager", "transCoordinator"];
+            roles.forEach(role => {
+                const tbody = document.getElementById(`tbl-${role}`);
+                if(!tbody) return;
+                tbody.innerHTML = "";
+                
+                Object.keys(metricLedgerData[role]).forEach(name => {
+                    const stats = metricLedgerData[role][name];
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${name}</strong></td>
+                            <td>${stats.f1.toLocaleString()} Logs</td>
+                            <td>${stats.f2.toLocaleString()} Units</td>
+                            <td style="color:var(--primary); font-weight:600;">${stats.f3.toLocaleString()} Realized</td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        // PIPELINE BOARD ENGINE
+        function renderPipeline() {
+            pipelineOrder.forEach(stg => {
+                const el = document.getElementById(`col-${stg}`);
+                if(el) el.innerHTML = `<div class="col-header">${stg.toUpperCase()} <span class="count">0</span></div>`;
+            });
+
+            let closedRevenueWholesaleFeesTotals = 0;
+            let activeCount = 0;
+
+            leads.forEach(lead => {
+                if(lead.stage === 'closed') {
+                    closedRevenueWholesaleFeesTotals += lead.wholesale;
+                } else {
+                    activeCount++;
+                }
+
+                const columnEl = document.getElementById(`col-${lead.stage}`);
+                if(columnEl) {
+                    const card = document.createElement('div');
+                    card.className = 'deal-card';
+                    card.onclick = () => openDealModal(lead.id);
+                    card.innerHTML = `
+                        <div class="deal-title">${lead.address}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 0.5rem;">Seller: ${lead.sellerName || 'N/A'}</div>
+                        <div class="badge-row">
+                            <span class="deal-tag tag-market">${lead.market}</span>
+                            <span class="deal-tag tag-role">LM: ${lead.lm}</span>
+                            <span class="deal-tag tag-source">${lead.source}</span>
+                        </div>
+                        <div class="deal-meta">
+                            <span>MAO: $${(lead.mao/1000).toFixed(1)}k</span>
+                            <span style="color:var(--primary); font-weight:600;">Wholesale: $${lead.wholesale.toLocaleString()}</span>
+                        </div>
+                    `;
+                    columnEl.appendChild(card);
+                }
+            });
+
+            pipelineOrder.forEach(stg => {
+                const colEl = document.getElementById(`col-${stg}`);
+                if(colEl) {
+                    const count = colEl.querySelectorAll('.deal-card').length;
+                    colEl.querySelector('.count').innerText = count;
+                }
+            });
+
+            document.getElementById('stat-active').innerText = activeCount;
+            document.getElementById('stat-volume').innerText = `$${closedRevenueWholesaleFeesTotals.toLocaleString()}`;
+        }
+
+        // DISPO DESK MATRIX VIEW ENGINE
+        function renderDispoDeskView() {
+            const container = document.getElementById("dispo-cards-container");
+            container.innerHTML = "";
+            const targets = leads.filter(l => l.stage === 'contract' || l.stage === 'closed');
+
+            if(targets.length === 0) {
+                container.innerHTML = `<div style="color:var(--text-muted); font-size:0.9rem;">No active inventory records routed to disposition tracks currently.</div>`;
+                return;
+            }
+
+            targets.forEach(lead => {
+                container.innerHTML += `
+                    <div class="dispo-card">
+                        <h4 style="color:#fff; margin-bottom:0.5rem;">${lead.address}</h4>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                            Seller: <strong>${lead.sellerName || 'N/A'}</strong> | ${lead.sellerPhone || 'N/A'}
+                        </div>
+                        <div class="badge-row">
+                            <span class="deal-tag tag-role">Dispo Lead: ${lead.dm}</span>
+                            <span class="deal-tag tag-market">${lead.propType} (${lead.beds} Beds)</span>
+                            <span class="deal-tag tag-source" style="background:var(--primary); color:#fff;">Fee: $${lead.wholesale.toLocaleString()}</span>
+                        </div>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0;">
+                            <strong>Settlement Title Escrow:</strong> <span style="color:var(--warning); font-weight:500;">${lead.titleCompany || 'Not Assigned Yet'}</span>
+                        </p>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0;">
+                            <strong>Dispo Desk Feed Logs:</strong><br>${lead.dispoNotes || "No wireless wire broadcasts captured yet."}
+                        </p>
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:0.75rem; font-size:0.8rem;">
+                            <span>TC Control: <strong>${lead.tc}</strong></span>
+                            <button style="background:var(--bg-card); border:1px solid var(--border); color:#fff; padding:0.35rem 0.65rem; border-radius:0.25rem; cursor:pointer;" onclick="openDealModal(${lead.id})">Update File Matrix</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // PROPERTY INTAKE PROCESSING SAFEGUARDS
+        function submitNewLead() {
+            const address = document.getElementById("lead-address").value.trim() || "Distressed Property Listing Asset";
+            const sellerName = document.getElementById("lead-seller-name").value.trim() || "Unknown Seller";
+            const sellerPhone = document.getElementById("lead-seller-phone").value.trim() || "N/A";
+            const sellerEmail = document.getElementById("lead-seller-email").value.trim() || "N/A";
+            
+            const source = document.getElementById("lead-source").value;
+            const market = document.getElementById("lead-market").value;
+            const propType = document.getElementById("lead-prop-type").value;
+            const beds = document.getElementById("lead-beds").value;
+            const lm = document.getElementById("lead-lm-select").value;
+            const am = document.getElementById("lead-am-select").value;
+            
+            const arv = parseInt(document.getElementById("lead-arv").value) || 0;
+            const repairs = parseInt(document.getElementById("lead-repairs").value) || 0;
+            const wholesale = parseInt(document.getElementById("lead-wholesale").value) || 0;
+            
+            const calcs = runLiveUnderwritingCalculation();
+
+            if(beds === "2" && propType === "Single Family") {
+                alert("CRITICAL HOUSING EXCLUSION:\n\n2-Bedroom Single Family properties do not align with company liquidity underwriting protocols. File rejected to protect cash positions.");
+                return;
+            }
+
+            leads.push({
+                id: leads.length + 1,
+                address, sellerName, sellerPhone, sellerEmail, titleCompany: "", market, lm, am, dm: "Unassigned", tc: "Unassigned",
+                source, arv, repairs, wholesale, buffer: calcs.buffer, mao: calcs.mao, 
+                stage: 'new', propType, beds, dispoNotes: ""
+            });
+
+            closeModal('add-lead-modal');
+            renderPipeline();
+            
+            // Wipe data inputs
+            document.getElementById("lead-address").value = "";
+            document.getElementById("lead-seller-name").value = "";
+            document.getElementById("lead-seller-phone").value = "";
+            document.getElementById("lead-seller-email").value = "";
+            
+            alert("Property tracking file instantiated and logged cleanly.");
+        }
+
+        // DESTRUCTION ENGINE: REMOVE LEAD FILE PERMANENTLY
+        function deleteActiveLeadFile() {
+            if (!activeSelectedLeadId) return;
+            
+            const lead = leads.find(l => l.id === activeSelectedLeadId);
+            if (!lead) return;
+
+            const confirmation = confirm(`CRITICAL ACTION MANDATE:\n\nAre you sure you want to completely purge the tracking file for:\n"${lead.address}"?\n\nThis deletion cannot be undone.`);
+            
+            if (confirmation) {
+                leads = leads.filter(l => l.id !== activeSelectedLeadId);
+                closeModal('deal-modal');
+                renderPipeline();
+                renderDispoDeskView();
+                activeSelectedLeadId = null;
+                alert("Lead tracking file successfully scrubbed from terminal records.");
+            }
+        }
+
+        // WORKFLOW DETAILED MODAL MANAGEMENT
+        function openDealModal(id) {
+            const lead = leads.find(l => l.id === id);
+            if(!lead) return;
+            activeSelectedLeadId = id;
+
+            document.getElementById("modal-deal-title").innerText = lead.address;
+            document.getElementById("modal-seller-name").innerText = lead.sellerName || "N/A";
+            document.getElementById("modal-seller-phone").innerText = lead.sellerPhone || "N/A";
+            document.getElementById("modal-seller-email").innerText = lead.sellerEmail || "N/A";
+            
+            document.getElementById("modal-deal-stage").innerText = lead.stage;
+            document.getElementById("modal-deal-source").innerText = lead.source;
+            document.getElementById("modal-deal-wholesale").innerText = `$${lead.wholesale.toLocaleString()}`;
+            document.getElementById("modal-deal-mao").innerText = lead.mao > 0 ? `$${lead.mao.toLocaleString()}` : "$0";
+
+            document.getElementById("modal-assign-lm").value = lead.lm;
+            document.getElementById("modal-assign-am").value = lead.am;
+            document.getElementById("modal-assign-dm").value = lead.dm;
+            document.getElementById("modal-assign-tc").value = lead.tc;
+
+            const dispoPanel = document.getElementById("dispo-notes-panel");
+            const assignBox = document.getElementById("modal-dispo-tc-assign-box");
+            
+            if(lead.stage === 'contract' || lead.stage === 'closed') {
+                dispoPanel.style.display = "block";
+                assignBox.style.display = "grid";
+                document.getElementById("modal-dispo-notes").value = lead.dispoNotes;
+                document.getElementById("modal-dispo-title-co").value = lead.titleCompany || "";
+            } else {
+                dispoPanel.style.display = "none";
+                assignBox.style.display = "none";
+            }
+
+            document.getElementById("btn-move-back").style.visibility = (lead.stage === 'new') ? "hidden" : "visible";
+            document.getElementById("btn-move-forward").style.visibility = (lead.stage === 'closed') ? "hidden" : "visible";
+
+            const container = document.getElementById("modal-badge-container");
+            container.innerHTML = `
+                <span class="deal-tag tag-market">${lead.market}</span>
+                <span class="deal-tag tag-source">Origin: ${lead.source}</span>
+                <span class="deal-tag tag-role">${lead.propType} (${lead.beds} Br)</span>
+            `;
+
+            openModal('deal-modal');
+        }
+
+        // SAVE INTERMEDIATE MODAL STATE ASSIGNMENTS
+        function saveLeadManagerAssignments() {
+            const lead = leads.find(l => l.id === activeSelectedLeadId);
+            if(!lead) return;
+
+            lead.lm = document.getElementById("modal-assign-lm").value;
+            lead.am = document.getElementById("modal-assign-am").value;
+            
+            if(lead.stage === 'contract' || lead.stage === 'closed') {
+                lead.dispoNotes = document.getElementById("modal-dispo-notes").value;
+                lead.titleCompany = document.getElementById("modal-dispo-title-co").value.trim();
+                lead.dm = document.getElementById("modal-assign-dm").value;
+                lead.tc = document.getElementById("modal-assign-tc").value;
+            }
+
+            alert("Manager assignment parameters written cleanly to data arrays.");
+            closeModal('deal-modal');
+            renderPipeline();
+            renderDispoDeskView();
+        }
+
+        // BI-DIRECTIONAL PIPELINE TRAFFIC ROUTING ENGINE
+        function adjustPipelineDirection(directionModifier) {
+            const lead = leads.find(l => l.id === activeSelectedLeadId);
+            if(!lead) return;
+
+            const currentIndex = pipelineOrder.indexOf(lead.stage);
+            const targetIndex = currentIndex + directionModifier;
+
+            if(targetIndex >= 0 && targetIndex < pipelineOrder.length) {
+                // Ensure dynamic changes are saved when advancing or moving back stages
+                lead.lm = document.getElementById("modal-assign-lm").value;
+                lead.am = document.getElementById("modal-assign-am").value;
+
+                if(lead.stage === 'contract' || lead.stage === 'closed') {
+                    lead.dispoNotes = document.getElementById("modal-dispo-notes").value;
+                    lead.titleCompany = document.getElementById("modal-dispo-title-co").value.trim();
+                    lead.dm = document.getElementById("modal-assign-dm").value;
+                    lead.tc = document.getElementById("modal-assign-tc").value;
+                }
+
+                lead.stage = pipelineOrder[targetIndex];
+                alert(`Deal file status successfully adjusted to stage: ${lead.stage.toUpperCase()}`);
+                closeModal('deal-modal');
+                renderPipeline();
+                renderDispoDeskView();
+            }
+        }
+
+        // PROP OFFER GENERATION STRING INTERPOLATOR
+        function generateOfferEmail() {
+            const lead = leads.find(l => l.id === activeSelectedLeadId);
+            if(!lead) return;
+
+            const targetPurchasePrice = lead.mao > 0 ? lead.mao : Math.round(lead.arv * 0.6);
+            const monthlyPayment = Math.round(targetPurchasePrice / 360);
+
+            const emailTemplate = `Subject: Formal Offer Submission - ${lead.address}
+
+To Whom It May Concern,
+
+We are pleased to submit our formal purchasing offer framework for the asset located at ${lead.address}.
+
+We propose the following customized structures for your review:
+
+Option A: Creative Financing Alignment
+- Purchase Price Strategy: $${targetPurchasePrice.toLocaleString()}
+- Financing Terms: Structured via Principal-Only payments
+- Installment Plan: $${monthlyPayment}/month sustained over a standard amortization schedule.
+
+Transaction Specifications:
+Please note that for all confirmed acquisitions, we will utilize our own proprietary clear-title verified contract documentation alongside our preferred transaction closing title company. Our internal standard operational protocol mandates a secure closing timeline realized within 30 days of mutual execution.
+
+We look forward to collaborating on a successful settlement.
+
+Best Regards,
+Acquisitions Team
+Swift Equity Solutions LLC`;
+
+            navigator.clipboard.writeText(emailTemplate).then(() => {
+                alert("Offer scripts copied to operational clipboard successfully.");
+            });
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
+            document.querySelectorAll('.nav-links .nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            document.getElementById(`btn-nav-${viewId}`).classList.add('active');
+        }
+
+        function openModal(modalId) { document.getElementById(modalId).classList.add("active"); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove("active"); }
+        function handleLogin() { document.getElementById("auth-screen").style.display = "none"; }
+        function handleLogout() { document.getElementById("auth-screen").style.display = "flex"; }
+    </script>
+</body>
+</html>
