@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- Firebase Compat SDK Links (Zero-Installation Cloud Hooks) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -105,6 +106,7 @@
 </head>
 <body>
 
+    <!-- SECURE GATEKEEPER BOUNCER DOOR -->
     <div id="auth-screen">
         <div class="auth-box">
             <h2 style="font-size:1.4rem; text-align:center; margin-bottom:1rem;">Swift Equity Access System</h2>
@@ -273,6 +275,7 @@
         </section>
     </main>
 
+    <!-- INTAKE NEW PROPERTY MODAL -->
     <div class="modal-overlay" id="add-lead-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal('add-lead-modal')"><i data-lucide="x"></i></button>
@@ -369,6 +372,7 @@
         </div>
     </div>
 
+    <!-- UPDATE LEAD DETAILS MATRIX MODAL -->
     <div class="modal-overlay" id="deal-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal('deal-modal')"><i data-lucide="x"></i></button>
@@ -393,6 +397,7 @@
                 <div><label>Calculated Target MAO</label> <strong id="modal-deal-mao" style="color:var(--warning); font-size:1.05rem;">-</strong></div>
             </div>
 
+            <!-- DYNAMIC REASSIGNMENT DESK MATRIX -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
                 <div class="form-group">
                     <label>Reassign Lead Manager (LM)</label>
@@ -437,17 +442,16 @@
 
     <script>
         // --- 1. FIREBASE INITIALIZATION NETWORK MATRIX ---
-        // Your real credentials have been inserted automatically!
         const firebaseConfig = {
-            apiKey: "AIzaSyAs8A8oN318r_f0yW_Z6e1_mP8t9Z0-X5c",
-            authDomain: "swift-crm-ba6e1.firebaseapp.com",
-            projectId: "swift-crm-ba6e1",
-            storageBucket: "swift-crm-ba6e1.appspot.com",
-            messagingSenderId: "967520473335",
-            appId: "1:967520473335:web:8eefcd0ba94ea60d80e7a2"
+            apiKey: "AIzaSyC04LMz8V0_cLzmozi87ZPKCM6nYiP14w8",
+            authDomain: "swift-crm-4142d.firebaseapp.com",
+            projectId: "swift-crm-4142d",
+            storageBucket: "swift-crm-4142d.firebasestorage.app",
+            messagingSenderId: "351390654533",
+            appId: "1:351390654533:web:754c46438282dded25032c"
         };
 
-        // Instantiate Cloud Links
+        // Instantiate Cloud Links using Compat syntax
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
