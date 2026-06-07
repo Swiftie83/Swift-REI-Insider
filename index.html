@@ -110,7 +110,7 @@
             <h2 style="font-size:1.4rem; text-align:center; margin-bottom:1rem;">Swift Equity Access System</h2>
             <div class="form-group">
                 <label>Email ID</label>
-                <input type="email" id="auth-email" placeholder="admin@swiftequity.com">
+                <input type="email" id="auth-email" placeholder="admin@swiftequitysolutions.com">
             </div>
             <div class="form-group">
                 <label>System Password</label>
@@ -143,7 +143,7 @@
         </div>
         <div class="sidebar-footer">
             <div id="user-display-email" style="margin-bottom: 0.25rem; color:#fff; font-weight:500;"></div>
-            <div style="margin-bottom: 0.75rem; color:var(--text-muted); font-size:0.8rem; word-break: break-all;">swiftequitysolutions@gmail.com</div>[cite: 4]
+            <div style="margin-bottom: 0.75rem; color:var(--text-muted); font-size:0.8rem; word-break: break-all;">swiftequitysolutions@gmail.com</div>
             <button onclick="handleLogout()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.8rem;">Disconnect Terminal</button>
         </div>
     </aside>
@@ -393,7 +393,6 @@
                 <div><label>Calculated Target MAO</label> <strong id="modal-deal-mao" style="color:var(--warning); font-size:1.05rem;">-</strong></div>
             </div>
 
-            <!-- DYNAMIC REASSIGNMENT DESK MATRIX -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
                 <div class="form-group">
                     <label>Reassign Lead Manager (LM)</label>
@@ -437,6 +436,22 @@
     </div>
 
     <script>
+        // --- 1. FIREBASE INITIALIZATION NETWORK MATRIX ---
+        // Your real credentials have been inserted automatically!
+        const firebaseConfig = {
+            apiKey: "AIzaSyAs8A8oN318r_f0yW_Z6e1_mP8t9Z0-X5c",
+            authDomain: "swift-crm-ba6e1.firebaseapp.com",
+            projectId: "swift-crm-ba6e1",
+            storageBucket: "swift-crm-ba6e1.appspot.com",
+            messagingSenderId: "967520473335",
+            appId: "1:967520473335:web:8eefcd0ba94ea60d80e7a2"
+        };
+
+        // Instantiate Cloud Links
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
         // Structural Management Rosters Data Matrix
         let managementRoster = {
             leadManager: ["Sarah Jenkins", "Marcus Vance"],
@@ -465,27 +480,64 @@
             }
         };
 
-        // Static Property Leads Tracking Base Data Arrays
-        let leads = [
-            { id: 1, address: "1428 Elm St, Detroit MI", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "", market: "Standard", lm: "Sarah Jenkins", am: "David Ross", dm: "Unassigned", tc: "Unassigned", source: "Pre-Foreclosure", arv: 140000, repairs: 25000, wholesale: 12500, buffer: 17500, mao: 29000, stage: "new", propType: "Single Family", beds: "3", dispoNotes: "" },
-            { id: 2, address: "992 Texas Ave, Houston TX", sellerName: "Maria Gonzales", sellerPhone: "(713) 555-8831", sellerEmail: "mgonz81@yahoo.com", titleCompany: "Lone Star Escrow Services", market: "Standard", lm: "Marcus Vance", am: "Elena Rostova", dm: "Chris Gable", tc: "Tanya Cross", source: "Tax Lien", arv: 220000, repairs: 30000, wholesale: 15000, buffer: 27500, mao: 60000, stage: "closed", propType: "Single Family", beds: "3", dispoNotes: "" },
-            { id: 3, address: "4412 Citrus Dr, Tampa FL", sellerName: "Arthur Pendelton", sellerPhone: "(813) 555-4402", sellerEmail: "artiep@outlook.com", titleCompany: "Suncoast Title Partners", market: "Standard", lm: "Sarah Jenkins", am: "David Ross", dm: "Chris Gable", tc: "Kristi Vance", source: "Tired Landlord", arv: 310000, repairs: 45000, wholesale: 22000, buffer: 38750, mao: 80250, stage: "contract", propType: "Multi-Family", beds: "4+", dispoNotes: "Blasted out to clear tier-1 cash list buyers. Execution pending inspection walk." }
-        ];
+        // Cloud Real-Time Active Synchronization Leads Cache
+        let leads = [];
 
         const pipelineOrder = ['new', 'underwriting', 'offer', 'contract', 'closed'];
         let activeSelectedLeadId = null;
 
+        // --- 2. AUTH SECURE WALL CONTROLLER ENGINE ---
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById("auth-screen").style.display = "none";
+                document.getElementById("user-display-email").innerText = user.email;
+                document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
+                
+                // Initialize Live Network Feeds Upon Secure Validation
+                syncLeadsFromCloudNetwork();
+            } else {
+                document.getElementById("auth-screen").style.display = "flex";
+                document.getElementById("user-display-email").innerText = "";
+            }
+        });
+
+        function handleLogin() {
+            const email = document.getElementById("auth-email").value.trim();
+            const password = document.getElementById("auth-password").value;
+            
+            auth.signInWithEmailAndPassword(email, password).catch(err => {
+                alert("Terminal Access Violation: " + err.message);
+            });
+        }
+
+        function handleLogout() {
+            auth.signOut();
+        }
+
+        // --- 3. THE MAGIC INK ENGINE (CLOUD SNAPSHOT DATA SYNC) ---
+        function syncLeadsFromCloudNetwork() {
+            db.collection("leads").onSnapshot((snapshot) => {
+                leads = [];
+                snapshot.forEach((doc) => {
+                    let leadItem = doc.data();
+                    leadItem.id = doc.id; // Map cloud string token ID override
+                    leads.push(leadItem);
+                });
+                
+                // Re-trigger layout paints automatically across all system browsers
+                renderPipeline();
+                renderDispoDeskView();
+            }, (error) => {
+                console.error("Database streaming dropped: ", error);
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             lucide.createIcons();
             rebuildAllFormSelectorDropdowns();
-            renderPipeline();
             renderPerformanceMetricsTables();
-            renderDispoDeskView();
             toggleMetricInputs();
             runLiveUnderwritingCalculation();
-            document.getElementById("auth-screen").style.display = "none";
-            document.getElementById("user-display-email").innerText = "admin-hq@swiftequity.com";
-            document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
         });
 
         // LIVE INSTITUTIONAL UNDERWRITING ENGINE
@@ -695,7 +747,7 @@
                         </p>
                         <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:0.75rem; font-size:0.8rem;">
                             <span>TC Control: <strong>${lead.tc}</strong></span>
-                            <button style="background:var(--bg-card); border:1px solid var(--border); color:#fff; padding:0.35rem 0.65rem; border-radius:0.25rem; cursor:pointer;" onclick="openDealModal(${lead.id})">Update File Matrix</button>
+                            <button style="background:var(--bg-card); border:1px solid var(--border); color:#fff; padding:0.35rem 0.65rem; border-radius:0.25rem; cursor:pointer;" onclick="openDealModal('${lead.id}')">Update File Matrix</button>
                         </div>
                     </div>
                 `;
@@ -727,23 +779,24 @@
                 return;
             }
 
-            leads.push({
-                id: leads.length + 1,
-                address, sellerName, sellerPhone, sellerEmail, titleCompany: "", market, lm, am, dm: "Unassigned", tc: "Unassigned",
-                source, arv, repairs, wholesale, buffer: calcs.buffer, mao: calcs.mao, 
-                stage: 'new', propType, beds, dispoNotes: ""
-            });
-
-            closeModal('add-lead-modal');
-            renderPipeline();
-            
-            // Wipe data inputs
-            document.getElementById("lead-address").value = "";
-            document.getElementById("lead-seller-name").value = "";
-            document.getElementById("lead-seller-phone").value = "";
-            document.getElementById("lead-seller-email").value = "";
-            
-            alert("Property tracking file instantiated and logged cleanly.");
+            // Write object record directly to Firestore cloud instance
+            db.collection("leads").add({
+                address, sellerName, sellerPhone, sellerEmail, titleCompany: "", market, lm, am, 
+                dm: "Unassigned", tc: "Unassigned", source, arv, repairs, wholesale, 
+                buffer: calcs.buffer, mao: calcs.mao, stage: 'new', propType, beds, dispoNotes: ""
+            })
+            .then(() => {
+                closeModal('add-lead-modal');
+                
+                // Wipe data inputs
+                document.getElementById("lead-address").value = "";
+                document.getElementById("lead-seller-name").value = "";
+                document.getElementById("lead-seller-phone").value = "";
+                document.getElementById("lead-seller-email").value = "";
+                
+                alert("Property tracking file uploaded to cloud network safely.");
+            })
+            .catch(err => alert("Error uploading lead file: " + err.message));
         }
 
         // DESTRUCTION ENGINE: REMOVE LEAD FILE PERMANENTLY
@@ -756,12 +809,12 @@
             const confirmation = confirm(`CRITICAL ACTION MANDATE:\n\nAre you sure you want to completely purge the tracking file for:\n"${lead.address}"?\n\nThis deletion cannot be undone.`);
             
             if (confirmation) {
-                leads = leads.filter(l => l.id !== activeSelectedLeadId);
-                closeModal('deal-modal');
-                renderPipeline();
-                renderDispoDeskView();
-                activeSelectedLeadId = null;
-                alert("Lead tracking file successfully scrubbed from terminal records.");
+                db.collection("leads").doc(activeSelectedLeadId).delete().then(() => {
+                    closeModal('deal-modal');
+                    activeSelectedLeadId = null;
+                    alert("Lead tracking file successfully scrubbed from cloud cluster records.");
+                })
+                .catch(err => alert("Error removing file: " + err.message));
             }
         }
 
@@ -792,7 +845,7 @@
             if(lead.stage === 'contract' || lead.stage === 'closed') {
                 dispoPanel.style.display = "block";
                 assignBox.style.display = "grid";
-                document.getElementById("modal-dispo-notes").value = lead.dispoNotes;
+                document.getElementById("modal-dispo-notes").value = lead.dispoNotes || "";
                 document.getElementById("modal-dispo-title-co").value = lead.titleCompany || "";
             } else {
                 dispoPanel.style.display = "none";
@@ -814,27 +867,31 @@
 
         // SAVE INTERMEDIATE MODAL STATE ASSIGNMENTS
         function saveLeadManagerAssignments() {
-            const lead = leads.find(l => l.id === activeSelectedLeadId);
-            if(!lead) return;
+            if(!activeSelectedLeadId) return;
 
-            lead.lm = document.getElementById("modal-assign-lm").value;
-            lead.am = document.getElementById("modal-assign-am").value;
+            const updates = {
+                lm: document.getElementById("modal-assign-lm").value,
+                am: document.getElementById("modal-assign-am").value
+            };
             
-            if(lead.stage === 'contract' || lead.stage === 'closed') {
-                lead.dispoNotes = document.getElementById("modal-dispo-notes").value;
-                lead.titleCompany = document.getElementById("modal-dispo-title-co").value.trim();
-                lead.dm = document.getElementById("modal-assign-dm").value;
-                lead.tc = document.getElementById("modal-assign-tc").value;
+            const lead = leads.find(l => l.id === activeSelectedLeadId);
+            if(lead && (lead.stage === 'contract' || lead.stage === 'closed')) {
+                updates.dispoNotes = document.getElementById("modal-dispo-notes").value;
+                updates.titleCompany = document.getElementById("modal-dispo-title-co").value.trim();
+                updates.dm = document.getElementById("modal-assign-dm").value;
+                updates.tc = document.getElementById("modal-assign-tc").value;
             }
 
-            alert("Manager assignment parameters written cleanly to data arrays.");
-            closeModal('deal-modal');
-            renderPipeline();
-            renderDispoDeskView();
+            db.collection("leads").doc(activeSelectedLeadId).update(updates).then(() => {
+                alert("Manager assignment parameters synced globally across cloud nodes.");
+                closeModal('deal-modal');
+            })
+            .catch(err => alert("Error writing changes: " + err.message));
         }
 
         // BI-DIRECTIONAL PIPELINE TRAFFIC ROUTING ENGINE
         function adjustPipelineDirection(directionModifier) {
+            if(!activeSelectedLeadId) return;
             const lead = leads.find(l => l.id === activeSelectedLeadId);
             if(!lead) return;
 
@@ -842,22 +899,26 @@
             const targetIndex = currentIndex + directionModifier;
 
             if(targetIndex >= 0 && targetIndex < pipelineOrder.length) {
-                // Ensure dynamic changes are saved when advancing or moving back stages
-                lead.lm = document.getElementById("modal-assign-lm").value;
-                lead.am = document.getElementById("modal-assign-am").value;
+                const targetStageName = pipelineOrder[targetIndex];
+                
+                const updates = {
+                    stage: targetStageName,
+                    lm: document.getElementById("modal-assign-lm").value,
+                    am: document.getElementById("modal-assign-am").value
+                };
 
                 if(lead.stage === 'contract' || lead.stage === 'closed') {
-                    lead.dispoNotes = document.getElementById("modal-dispo-notes").value;
-                    lead.titleCompany = document.getElementById("modal-dispo-title-co").value.trim();
-                    lead.dm = document.getElementById("modal-assign-dm").value;
-                    lead.tc = document.getElementById("modal-assign-tc").value;
+                    updates.dispoNotes = document.getElementById("modal-dispo-notes").value;
+                    updates.titleCompany = document.getElementById("modal-dispo-title-co").value.trim();
+                    updates.dm = document.getElementById("modal-assign-dm").value;
+                    updates.tc = document.getElementById("modal-assign-tc").value;
                 }
 
-                lead.stage = pipelineOrder[targetIndex];
-                alert(`Deal file status successfully adjusted to stage: ${lead.stage.toUpperCase()}`);
-                closeModal('deal-modal');
-                renderPipeline();
-                renderDispoDeskView();
+                db.collection("leads").doc(activeSelectedLeadId).update(updates).then(() => {
+                    alert(`Deal file status successfully adjusted to stage: ${targetStageName.toUpperCase()}`);
+                    closeModal('deal-modal');
+                })
+                .catch(err => alert("Error modifying pipeline stage: " + err.message));
             }
         }
 
@@ -905,8 +966,6 @@ Swift Equity Solutions LLC`;
 
         function openModal(modalId) { document.getElementById(modalId).classList.add("active"); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove("active"); }
-        function handleLogin() { document.getElementById("auth-screen").style.display = "none"; }
-        function handleLogout() { document.getElementById("auth-screen").style.display = "flex"; }
     </script>
 </body>
 </html>
