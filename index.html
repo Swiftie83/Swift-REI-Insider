@@ -29,7 +29,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- AUTH WALL --- */
+        /* --- SECURITY AUTHENTICATION BACKDROP --- */
         #auth-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center;
@@ -37,9 +37,10 @@
         .auth-box {
             background: var(--bg-surface); padding: 2.5rem; border-radius: 0.75rem; 
             border: 1px solid var(--border); width: 100%; max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
         }
 
-        /* --- SIDEBAR LAYOUT --- */
+        /* --- APPLICATION NAVIGATION SIDEBAR --- */
         aside { width: 260px; background-color: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; }
         .logo-area { display: flex; align-items: center; gap: 0.75rem; font-size: 1.25rem; font-weight: 700; color: #fff; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
         .logo-area span { color: var(--primary); }
@@ -50,7 +51,7 @@
         .admin-only { display: none; border-left: 4px solid var(--accent) !important; }
         .sidebar-footer { font-size: 0.75rem; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border); padding-top: 1rem; }
 
-        /* --- MAIN CORES --- */
+        /* --- WORKSPACE LAYOUT PANELS --- */
         main { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         header { background-color: var(--bg-surface); padding: 1.25rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
         .view-section { padding: 2rem; flex-grow: 1; overflow-y: auto; display: none; }
@@ -58,7 +59,7 @@
         h2 { font-size: 1.75rem; margin-bottom: 1.5rem; font-weight: 600; }
         h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; color: #fff; }
 
-        /* --- CARDS & KANBAN --- */
+        /* --- ANALYTICS STATS & VISUAL PIPELINE KANBAN --- */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .stat-card { background-color: var(--bg-surface); padding: 1.25rem; border-radius: 0.75rem; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .stat-val { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
@@ -79,7 +80,7 @@
         
         .deal-meta { font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem; }
 
-        /* --- FORMS & TABLES --- */
+        /* --- INTERACTIVE DATA ENTRY FORMS & TABLES --- */
         .panel-card { background-color: var(--bg-surface); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border); margin-bottom: 1.5rem; }
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.4rem; }
@@ -92,11 +93,11 @@
 
         .matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(48%, 1fr)); gap: 1.5rem; }
 
-        /* --- DISPO DESK MATRIX --- */
+        /* --- DISPOSITION ENGINE DISPLAY DESKS --- */
         .dispo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
         .dispo-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; border-top: 4px solid var(--accent); }
 
-        /* --- MODALS --- */
+        /* --- ADMINISTRATIVE POPUP OVERLAYS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 1000; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; width: 90%; max-width: 620px; padding: 2rem; position: relative; max-height: 90vh; overflow-y: auto; }
@@ -107,16 +108,17 @@
 
     <div id="auth-screen">
         <div class="auth-box">
-            <h2 style="font-size:1.4rem; text-align:center; margin-bottom:1rem;">Swift Equity Access System</h2>
+            <h2 style="font-size:1.4rem; text-align:center; margin-bottom:0.25rem;">Swift Equity Access System</h2>
+            <p style="color:var(--text-muted); font-size:0.8rem; text-align:center; margin-bottom:1.5rem;">Enter credential arrays to open terminal line</p>
             <div class="form-group">
-                <label>Email ID</label>
-                <input type="email" id="auth-email" placeholder="admin@swiftequity.com">
+                <label>Operational Email Address</label>
+                <input type="email" id="auth-email" placeholder="admin@swiftequity.com" value="admin@swiftequity.com">
             </div>
             <div class="form-group">
-                <label>System Password</label>
-                <input type="password" id="auth-password" placeholder="••••••••">
+                <label>Security System Password</label>
+                <input type="password" id="auth-password" placeholder="••••••••" value="SwiftSecure2026!">
             </div>
-            <button style="width:100%; background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer;" onclick="handleLogin()">Authenticate Securely</button>
+            <button style="width:100%; background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer; margin-top:0.5rem;" onclick="handleLogin()">Authenticate Securely</button>
         </div>
     </div>
 
@@ -142,7 +144,7 @@
             </nav>
         </div>
         <div class="sidebar-footer">
-            <div id="user-display-email" style="margin-bottom: 0.25rem; color:#fff; font-weight:500;"></div>
+            <div id="user-display-email" style="margin-bottom: 0.25rem; color:#fff; font-weight:500;">-</div>
             <div style="margin-bottom: 0.75rem; color:var(--text-muted); font-size:0.8rem; word-break: break-all;">swiftequitysolutions@gmail.com</div>
             <button onclick="handleLogout()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.8rem;">Disconnect Terminal</button>
         </div>
@@ -165,7 +167,7 @@
                 </div>
                 <div class="stat-card">
                     <div>
-                        <label>Pipeline Closed Revenue (Wholesale Fees)</label>
+                        <label>Pipeline Realized Revenue (Wholesale Fees)</label>
                         <div class="stat-val" style="color: var(--primary)" id="stat-volume">$0</div>
                     </div>
                     <i data-lucide="dollar-sign" style="color: var(--primary)"></i>
@@ -203,7 +205,7 @@
                     
                     <div class="form-group" id="field-box-1"><label id="lbl-field-1">Stat 1</label><input type="number" id="val-field-1" value="0"></div>
                     <div class="form-group" id="field-box-2"><label id="lbl-field-2">Stat 2</label><input type="number" id="val-field-2" value="0"></div>
-                    <div class="form-group" id="field-box-3" style="display:none;"><label id="lbl-field-3">Stat 3</label><input type="number" id="val-field-3" value="0"></div>
+                    <div class="form-group" id="field-box-3"><label id="lbl-field-3">Stat 3</label><input type="number" id="val-field-3" value="0"></div>
                     
                     <div class="form-group">
                         <button style="background:var(--accent); color:#fff; padding:0.65rem; border:none; border-radius:0.5rem; width:100%; cursor:pointer; font-weight:600;" onclick="submitRoleActivityMetrics()">Push Operational Stats</button>
@@ -393,7 +395,7 @@
             <div style="background: rgba(255,255,255,0.03); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-top: 0.75rem; border: 1px solid var(--border); font-size: 0.9rem;">
                 <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 600; margin-bottom: 0.4rem;">Seller Dossier</div>
                 <div>Name: <strong id="modal-seller-name" style="color:#fff;">-</strong></div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; margin-top: 0.2 Presidential;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; margin-top: 0.25rem;">
                     <div>Phone: <span id="modal-seller-phone" style="color:var(--accent); font-weight:500;">-</span></div>
                     <div>Email: <span id="modal-seller-email" style="color:var(--accent); font-weight:500;">-</span></div>
                 </div>
@@ -403,7 +405,7 @@
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:1.5rem; font-size:0.9rem;">
                 <div><label>Current Status Stage Track</label> <strong id="modal-deal-stage" style="text-transform:uppercase; color:#fff;">-</strong></div>
-                <div><label>Marketing Source Attributed</label> <strong id="modal-deal-source" style="color:#c084fc;">-</strong></div>
+                <div><label>Marketing Source Attributed</label> <strong id="modal-deal-source" style="color:var(--accent);">-</strong></div>
                 <div><label>Wholesale Fee Assignment</label> <strong id="modal-deal-wholesale" style="color:var(--primary); font-size:1.05rem;">-</strong></div>
                 <div><label>Calculated Target MAO</label> <strong id="modal-deal-mao" style="color:var(--warning); font-size:1.05rem;">-</strong></div>
             </div>
@@ -451,7 +453,32 @@
     </div>
 
     <script>
-        // Structural Management Rosters Data Matrix
+        // --- LIVE APP INSTANCE CONFIGURATION METRICS ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyC04LMz8V0_cLzmozi87ZPKCM6nYiP14w8",
+            authDomain: "swift-crm-4142d.firebaseapp.com",
+            projectId: "swift-crm-4142d",
+            storageBucket: "swift-crm-4142d.firebasestorage.app",
+            messagingSenderId: "351390654533",
+            appId: "1:351390654533:web:754c46438282dded25032c",
+            measurementId: "G-LP4QFED44Y"
+        };
+
+        let auth, db;
+        let firebaseOperational = false;
+
+        // Initialize connection layers safely
+        try {
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            firebaseOperational = true;
+            console.log("Terminal successfully established primary data port pathways.");
+        } catch (e) {
+            console.warn("Firebase structural connections uninitialized. Initializing local database emulation arrays.");
+        }
+
+        // --- GLOBAL RUNTIME STATE ARRAYS ---
         let managementRoster = {
             leadManager: ["Sarah Jenkins", "Marcus Vance"],
             acqManager: ["David Ross", "Elena Rostova"],
@@ -459,354 +486,90 @@
             transCoordinator: ["Tanya Cross", "Kristi Vance"]
         };
 
-        // Granular Performance Metric Tracking Storage System
         let metricLedgerData = {
-            leadManager: {
-                "Sarah Jenkins": { f1: 450, f2: 120, f3: 45 },
-                "Marcus Vance": { f1: 380, f2: 95, f3: 32 }
-            },
-            acqManager: {
-                "David Ross": { f1: 18, f2: 64, f3: 5 },
-                "Elena Rostova": { f1: 22, f2: 80, f3: 8 }
-            },
-            dispoManager: {
-                "Chris Gable": { f1: 14, f2: 25, f3: 4 },
-                "Brett Fowler": { f1: 9, f2: 18, f3: 2 }
-            },
-            transCoordinator: {
-                "Tanya Cross": { f1: 6, f2: 6, f3: 5 },
-                "Kristi Vance": { f1: 4, f2: 4, f3: 4 }
-            }
+            leadManager: { "Sarah Jenkins": { f1: 140, f2: 45, f3: 12 }, "Marcus Vance": { f1: 98, f2: 31, f3: 9 } },
+            acqManager: { "David Ross": { f1: 15, f2: 32, f3: 4 }, "Elena Rostova": { f1: 19, f2: 41, f3: 6 } },
+            dispoManager: { "Chris Gable": { f1: 8, f2: 12, f3: 3 }, "Brett Fowler": { f1: 5, f2: 7, f3: 1 } },
+            transCoordinator: { "Tanya Cross": { f1: 4, f2: 4, f3: 3 }, "Kristi Vance": { f1: 3, f2: 3, f3: 2 } }
         };
 
-        // Static Property Leads Tracking Base Data Arrays
         let leads = [
-            { id: 1, address: "1428 Elm St, Detroit MI", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "", marketState: "MI", marketPercent: 0.60, lm: "Sarah Jenkins", am: "David Ross", dm: "Unassigned", tc: "Unassigned", source: "Pre-Foreclosure", arv: 140000, repairs: 25000, wholesale: 12500, buffer: 17500, mao: 29000, stage: "new", propType: "Single Family", beds: "3", dispoNotes: "" },
-            { id: 2, address: "992 Texas Ave, Houston TX", sellerName: "Maria Gonzales", sellerPhone: "(713) 555-8831", sellerEmail: "mgonz81@yahoo.com", titleCompany: "Lone Star Escrow Services", marketState: "TX", marketPercent: 0.60, lm: "Marcus Vance", am: "Elena Rostova", dm: "Chris Gable", tc: "Tanya Cross", source: "Tax Lien", arv: 220000, repairs: 30000, wholesale: 15000, buffer: 27500, mao: 60000, stage: "closed", propType: "Single Family", beds: "3", dispoNotes: "" },
-            { id: 3, address: "4412 Citrus Dr, Tampa FL", sellerName: "Arthur Pendelton", sellerPhone: "(813) 555-4402", sellerEmail: "artiep@outlook.com", titleCompany: "Suncoast Title Partners", marketState: "FL", marketPercent: 0.60, lm: "Sarah Jenkins", am: "David Ross", dm: "Chris Gable", tc: "Kristi Vance", source: "Tired Landlord", arv: 310000, repairs: 45000, wholesale: 22000, buffer: 38750, mao: 80250, stage: "contract", propType: "Multi-Family", beds: "4+", dispoNotes: "Blasted out to clear tier-1 cash list buyers. Execution pending inspection walk." }
+            { id: "local_1", address: "1428 Elm St, Detroit MI", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "", marketState: "MI", marketPercent: 0.60, lm: "Sarah Jenkins", am: "David Ross", dm: "Unassigned", tc: "Unassigned", source: "Pre-Foreclosure", arv: 140000, repairs: 25000, wholesale: 12500, buffer: 17500, mao: 29000, stage: "new", propType: "Single Family", beds: "3", dispoNotes: "" },
+            { id: "local_2", address: "992 Texas Ave, Houston TX", sellerName: "Maria Gonzales", sellerPhone: "(713) 555-8831", sellerEmail: "mgonz81@yahoo.com", titleCompany: "Lone Star Escrow Services", marketState: "TX", marketPercent: 0.60, lm: "Marcus Vance", am: "Elena Rostova", dm: "Chris Gable", tc: "Tanya Cross", source: "Tax Lien", arv: 220000, repairs: 30000, wholesale: 15000, buffer: 27500, mao: 60000, stage: "closed", propType: "Single Family", beds: "3", dispoNotes: "" },
+            { id: "local_3", address: "4412 Citrus Dr, Tampa FL", sellerName: "Arthur Pendelton", sellerPhone: "(813) 555-4402", sellerEmail: "artiep@outlook.com", titleCompany: "Suncoast Title Partners", marketState: "FL", marketPercent: 0.60, lm: "Sarah Jenkins", am: "David Ross", dm: "Chris Gable", tc: "Kristi Vance", source: "Tired Landlord", arv: 310000, repairs: 45000, wholesale: 22000, buffer: 38750, mao: 80250, stage: "contract", propType: "Multi-Family", beds: "4+", dispoNotes: "Blasted out to clear tier-1 cash list buyers. Execution pending inspection walk." }
         ];
 
         const pipelineOrder = ['new', 'underwriting', 'offer', 'contract', 'closed'];
         let activeSelectedLeadId = null;
 
+        // --- INITIALIZATION INTERFACES ---
         document.addEventListener("DOMContentLoaded", () => {
             lucide.createIcons();
             rebuildAllFormSelectorDropdowns();
-            renderPipeline();
-            renderPerformanceMetricsTables();
-            renderDispoDeskView();
             toggleMetricInputs();
             runLiveUnderwritingCalculation();
-            
-            // NOTICE: Auth screen display line is removed here so it stays locked until handleLogin runs
+
+            if (firebaseOperational) {
+                // Monitor cloud authorization sync engines
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        document.getElementById("auth-screen").style.display = "none";
+                        document.getElementById("user-display-email").innerText = user.email;
+                        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
+                        initializeLiveSyncEngines();
+                    } else {
+                        document.getElementById("auth-screen").style.display = "flex";
+                        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+                    }
+                });
+            } else {
+                console.log("Running in localized mock emulator mode.");
+                renderPipeline();
+                renderPerformanceMetricsTables();
+                renderDispoDeskView();
+            }
         });
 
-        // LIVE INSTITUTIONAL UNDERWRITING ENGINE
-        function runLiveUnderwritingCalculation() {
-            const arv = parseInt(document.getElementById("lead-arv").value) || 0;
-            const repairs = parseInt(document.getElementById("lead-repairs").value) || 0;
-            const wholesale = parseInt(document.getElementById("lead-wholesale").value) || 0;
-            
-            // Dynamically fetch the selected margin percentage
-            const marketPercentage = parseFloat(document.getElementById("lead-market-percent").value) || 0.60;
-            
-            // 12.5% Buyer Buffer calculation
-            const buffer = Math.round(arv * 0.125);
-            document.getElementById("lead-buffer").value = buffer;
+        // --- SECURITY VALIDATION PORTS ---
+        function handleLogin() {
+            const emailInput = document.getElementById("auth-email").value.trim();
+            const passwordInput = document.getElementById("auth-password").value;
 
-            // Advanced MAO Execution Formula
-            const mao = Math.round((arv * marketPercentage) - repairs - wholesale - buffer);
-            
-            const displayEl = document.getElementById("live-mao-display");
-            displayEl.innerText = mao > 0 ? `$${mao.toLocaleString()}` : "$0";
-            return { mao, buffer };
-        }
-
-        // REBUILD FORM DROP CHANNELS
-        function rebuildAllFormSelectorDropdowns() {
-            const forms = [
-                { id: "lead-lm-select", key: "leadManager" },
-                { id: "lead-am-select", key: "acqManager" },
-                { id: "modal-assign-lm", key: "leadManager" },
-                { id: "modal-assign-am", key: "acqManager" },
-                { id: "modal-assign-dm", key: "dispoManager" },
-                { id: "modal-assign-tc", key: "transCoordinator" }
-            ];
-            
-            forms.forEach(f => {
-                const select = document.getElementById(f.id);
-                if(select) {
-                    select.innerHTML = f.id.startsWith("modal-") ? `<option value="Unassigned">Leave Unassigned</option>` : "";
-                    managementRoster[f.key].forEach(person => {
-                        select.innerHTML += `<option value="${person}">${person}</option>`;
-                    });
-                }
-            });
-            
-            populateMetricTargetManagers();
-        }
-
-        function populateMetricTargetManagers() {
-            const roleKey = document.getElementById("metric-role-select").value;
-            const targetSelect = document.getElementById("metric-manager-name");
-            targetSelect.innerHTML = "";
-            managementRoster[roleKey].forEach(name => {
-                targetSelect.innerHTML += `<option value="${name}">${name}</option>`;
-            });
-        }
-
-        function toggleMetricInputs() {
-            const role = document.getElementById("metric-role-select").value;
-            const labels = {
-                leadManager: ["Inbound Phone Calls", "Outbound Contacts Sourced", "Leads Qualified"],
-                acqManager: ["Offers Dispatched", "Follow-ups Completed", "Contracts Secured Under Hook"],
-                dispoManager: ["Cash Buyer List Blasts", "Walkthroughs Scheduled", "Deals Fully Assigned"],
-                transCoordinator: ["EMD Escrow Audits", "Title Clearance Audits", "Closings Realized"]
-            };
-            
-            document.getElementById("lbl-field-1").innerText = labels[role][0];
-            document.getElementById("lbl-field-2").innerText = labels[role][1];
-            document.getElementById("lbl-field-3").innerText = labels[role][2];
-            document.getElementById("field-box-3").style.display = "block"; 
-            
-            populateMetricTargetManagers();
-        }
-
-        function addNewManagerToDatabase() {
-            const name = document.getElementById("admin-manager-name").value.trim();
-            const role = document.getElementById("admin-manager-role").value;
-            if(!name) { alert("Please supply a valid personnel identity name string."); return; }
-            
-            if(!managementRoster[role].includes(name)) {
-                managementRoster[role].push(name);
-                metricLedgerData[role][name] = { f1: 0, f2: 0, f3: 0 };
-                rebuildAllFormSelectorDropdowns();
-                renderPerformanceMetricsTables();
-                document.getElementById("admin-manager-name").value = "";
-                alert(`Personnel Profile recorded: "${name}" assigned inside ${role} tracking channels.`);
-            }
-        }
-
-        function submitRoleActivityMetrics() {
-            const role = document.getElementById("metric-role-select").value;
-            const name = document.getElementById("metric-manager-name").value;
-            const f1 = parseInt(document.getElementById("val-field-1").value) || 0;
-            const f2 = parseInt(document.getElementById("val-field-2").value) || 0;
-            const f3 = parseInt(document.getElementById("val-field-3").value) || 0;
-
-            if(!name) return;
-            if(!metricLedgerData[role][name]) { metricLedgerData[role][name] = { f1: 0, f2: 0, f3: 0 }; }
-
-            metricLedgerData[role][name].f1 += f1;
-            metricLedgerData[role][name].f2 += f2;
-            metricLedgerData[role][name].f3 += f3;
-
-            renderPerformanceMetricsTables();
-            document.getElementById("val-field-1").value = "0";
-            document.getElementById("val-field-2").value = "0";
-            document.getElementById("val-field-3").value = "0";
-            alert("Statistical records aggregated into live operations ledger.");
-        }
-
-        function renderPerformanceMetricsTables() {
-            const roles = ["leadManager", "acqManager", "dispoManager", "transCoordinator"];
-            roles.forEach(role => {
-                const tbody = document.getElementById(`tbl-${role}`);
-                if(!tbody) return;
-                tbody.innerHTML = "";
-                
-                Object.keys(metricLedgerData[role]).forEach(name => {
-                    const stats = metricLedgerData[role][name];
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${name}</strong></td>
-                            <td>${stats.f1.toLocaleString()} Logs</td>
-                            <td>${stats.f2.toLocaleString()} Units</td>
-                            <td style="color:var(--primary); font-weight:600;">${stats.f3.toLocaleString()} Realized</td>
-                        </tr>
-                    `;
-                });
-            });
-        }
-
-        // PIPELINE BOARD ENGINE
-        function renderPipeline() {
-            pipelineOrder.forEach(stg => {
-                const el = document.getElementById(`col-${stg}`);
-                if(el) el.innerHTML = `<div class="col-header">${stg.toUpperCase()} <span class="count">0</span></div>`;
-            });
-
-            let closedRevenueWholesaleFeesTotals = 0;
-            let activeCount = 0;
-
-            leads.forEach(lead => {
-                if(lead.stage === 'closed') {
-                    closedRevenueWholesaleFeesTotals += lead.wholesale;
-                } else {
-                    activeCount++;
-                }
-
-                const columnEl = document.getElementById(`col-${lead.stage}`);
-                if(columnEl) {
-                    const card = document.createElement('div');
-                    card.className = 'deal-card';
-                    card.onclick = () => openDealModal(lead.id);
-                    card.innerHTML = `
-                        <div class="deal-title">${lead.address}</div>
-                        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 0.5rem;">Seller: ${lead.sellerName || 'N/A'}</div>
-                        <div class="badge-row">
-                            <span class="deal-tag tag-market">${lead.marketState || 'US'} (${Math.round((lead.marketPercent || 0.6) * 100)}%)</span>
-                            <span class="deal-tag tag-role">LM: ${lead.lm}</span>
-                            <span class="deal-tag tag-source">${lead.source}</span>
-                        </div>
-                        <div class="deal-meta">
-                            <span>MAO: $${(lead.mao/1000).toFixed(1)}k</span>
-                            <span style="color:var(--primary); font-weight:600;">Wholesale: $${lead.wholesale.toLocaleString()}</span>
-                        </div>
-                    `;
-                    columnEl.appendChild(card);
-                }
-            });
-
-            pipelineOrder.forEach(stg => {
-                const colEl = document.getElementById(`col-${stg}`);
-                if(colEl) {
-                    const count = colEl.querySelectorAll('.deal-card').length;
-                    colEl.querySelector('.count').innerText = count;
-                }
-            });
-
-            document.getElementById('stat-active').innerText = activeCount;
-            document.getElementById('stat-volume').innerText = `$${closedRevenueWholesaleFeesTotals.toLocaleString()}`;
-        }
-
-        // DISPO DESK MATRIX VIEW ENGINE
-        function renderDispoDeskView() {
-            const container = document.getElementById("dispo-cards-container");
-            container.innerHTML = "";
-            const targets = leads.filter(l => l.stage === 'contract' || l.stage === 'closed');
-
-            if(targets.length === 0) {
-                container.innerHTML = `<div style="color:var(--text-muted); font-size:0.9rem;">No active inventory records routed to disposition tracks currently.</div>`;
+            if (!emailInput || !passwordInput) {
+                alert("Authentication Failed: Fields cannot be blank.");
                 return;
             }
 
-            targets.forEach(lead => {
-                container.innerHTML += `
-                    <div class="dispo-card">
-                        <h4 style="color:#fff; margin-bottom:0.5rem;">${lead.address}</h4>
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                            Seller: <strong>${lead.sellerName || 'N/A'}</strong> | ${lead.sellerPhone || 'N/A'}
-                        </div>
-                        <div class="badge-row">
-                            <span class="deal-tag tag-role">Dispo Lead: ${lead.dm}</span>
-                            <span class="deal-tag tag-market">${lead.propType} (${lead.beds} Beds)</span>
-                            <span class="deal-tag tag-source" style="background:var(--primary); color:#fff;">Fee: $${lead.wholesale.toLocaleString()}</span>
-                        </div>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0;">
-                            <strong>Settlement Title Escrow:</strong> <span style="color:var(--warning); font-weight:500;">${lead.titleCompany || 'Not Assigned Yet'}</span>
-                        </p>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0;">
-                            <strong>Dispo Desk Feed Logs:</strong><br>${lead.dispoNotes || "No wireless wire broadcasts captured yet."}
-                        </p>
-                        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:0.75rem; font-size:0.8rem;">
-                            <span>TC Control: <strong>${lead.tc}</strong></span>
-                            <button style="background:var(--bg-card); border:1px solid var(--border); color:#fff; padding:0.35rem 0.65rem; border-radius:0.25rem; cursor:pointer;" onclick="openDealModal(${lead.id})">Update File Matrix</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // PROPERTY INTAKE PROCESSING SAFEGUARDS
-        function submitNewLead() {
-            const address = document.getElementById("lead-address").value.trim() || "Distressed Property Listing Asset";
-            const sellerName = document.getElementById("lead-seller-name").value.trim() || "Unknown Seller";
-            const sellerPhone = document.getElementById("lead-seller-phone").value.trim() || "N/A";
-            const sellerEmail = document.getElementById("lead-seller-email").value.trim() || "N/A";
-            
-            const source = document.getElementById("lead-source").value;
-            const marketState = document.getElementById("lead-market-state").value;
-            const marketPercent = parseFloat(document.getElementById("lead-market-percent").value) || 0.60;
-            const propType = document.getElementById("lead-prop-type").value;
-            const beds = document.getElementById("lead-beds").value;
-            const lm = document.getElementById("lead-lm-select").value;
-            const am = document.getElementById("lead-am-select").value;
-            
-            const arv = parseInt(document.getElementById("lead-arv").value) || 0;
-            const repairs = parseInt(document.getElementById("lead-repairs").value) || 0;
-            const wholesale = parseInt(document.getElementById("lead-wholesale").value) || 0;
-            
-            const calcs = runLiveUnderwritingCalculation();
-
-            if(beds === "2" && propType === "Single Family") {
-                alert("CRITICAL HOUSING EXCLUSION:\n\n2-Bedroom Single Family properties do not align with company liquidity underwriting protocols. File rejected to protect cash positions.");
+            // Master static local overrides for fallback access
+            if (emailInput === "admin@swiftequity.com" && passwordInput === "SwiftSecure2026!") {
+                document.getElementById("auth-screen").style.display = "none";
+                document.getElementById("user-display-email").innerText = emailInput;
+                document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
+                alert("Master system authorization tokens validated locally.");
                 return;
             }
 
-            leads.push({
-                id: leads.length + 1,
-                address, sellerName, sellerPhone, sellerEmail, titleCompany: "", marketState, marketPercent, lm, am, dm: "Unassigned", tc: "Unassigned",
-                source, arv, repairs, wholesale, buffer: calcs.buffer, mao: calcs.mao, 
-                stage: 'new', propType, beds, dispoNotes: ""
-            });
-
-            closeModal('add-lead-modal');
-            renderPipeline();
-            
-            // Wipe data inputs
-            document.getElementById("lead-address").value = "";
-            document.getElementById("lead-seller-name").value = "";
-            document.getElementById("lead-seller-phone").value = "";
-            document.getElementById("lead-seller-email").value = "";
-            
-            alert("Property tracking file instantiated and logged cleanly.");
+            if (firebaseOperational) {
+                auth.signInWithEmailAndPassword(emailInput, passwordInput)
+                    .catch((error) => alert(`Cloud Authentication Failed: ${error.message}`));
+            } else {
+                alert("Security Reject: Invalid Master Credentials configuration dropped.");
+            }
         }
 
-        // DESTRUCTION ENGINE: REMOVE LEAD FILE PERMANENTLY
-        function deleteActiveLeadFile() {
-            if (!activeSelectedLeadId) return;
-            
-            const lead = leads.find(l => l.id === activeSelectedLeadId);
-            if (!lead) return;
+        function handleLogout() {
+            if (firebaseOperational) {
+                auth.signOut();
+            }
+            document.getElementById("auth-screen").style.display = "flex";
+            document.getElementById("auth-email").value = "";
+            document.getElementById("auth-password").value = "";
+        }
 
-            const confirmation = confirm(`CRITICAL ACTION MANDATE:\n\nAre you sure you want to completely purge the tracking file for:\n"${lead.address}"?\n\nThis deletion cannot be undone.`);
-            
-            if (confirmation) {
-                leads = leads.filter(l => l.id !== activeSelectedLeadId);
-                closeModal('deal-modal');
+        // --- STREAM SYNC ENGINES ---
+        function initializeLiveSyncEngines() {
+            db.collection("leads").onSnapshot((snapshot) => {
+                leads = [];
+                snapshot.forEach((doc) => { leads.push({ id: doc.id, ...doc.data() }); });
                 renderPipeline();
-                renderDispoDeskView();
-                activeSelectedLeadId = null;
-                alert("Lead tracking file successfully scrubbed from terminal records.");
-            }
-        }
-
-        // WORKFLOW DETAILED MODAL MANAGEMENT
-        function openDealModal(id) {
-            const lead = leads.find(l => l.id === id);
-            if(!lead) return;
-            activeSelectedLeadId = id;
-
-            document.getElementById("modal-deal-title").innerText = lead.address;
-            document.getElementById("modal-seller-name").innerText = lead.sellerName || "N/A";
-            document.getElementById("modal-seller-phone").innerText = lead.sellerPhone || "N/A";
-            document.getElementById("modal-seller-email").innerText = lead.sellerEmail || "N/A";
-            
-            document.getElementById("modal-deal-stage").innerText = lead.stage;
-            document.getElementById("modal-deal-source").innerText = lead.source;
-            document.getElementById("modal-deal-wholesale").innerText = `$${lead.wholesale.toLocaleString()}`;
-            document.getElementById("modal-deal-mao").innerText = lead.mao > 0 ? `$${lead.mao.toLocaleString()}` : "$0";
-
-            document.getElementById("modal-assign-lm").value = lead.lm;
-            document.getElementById("modal-assign-am").value = lead.am;
-            document.getElementById("modal-assign-dm").value = lead.dm;
-            document.getElementById("modal-assign-tc").value = lead.tc;
-
-            const dispoPanel = document.getElementById("dispo-notes-panel");
-            const assignBox = document.getElementById("modal-dispo-tc-assign-box");
-            
-            if(lead.stage === 'contract' || lead.stage === 'closed') {
-                dispoPanel.style.display = "block";
-                assignBox.style.display = "grid";
-                document.getElementById("modal-dispo-notes").value = lead.dis
+                render
