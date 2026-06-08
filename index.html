@@ -1001,30 +1001,36 @@ Swift Equity Solutions LLC`;
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
 const supabaseUrl = "https://ueczqlsksvocohglmdkg.supabase.co";
 
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlY3pxbHNrc3ZvY29oZ2xtZGtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NjYxNDksImV4cCI6MjA5NjQ0MjE0OX0.WsP2fxmpaIEKCrbBtRdM1p9pl5INcn4YaInWafkBoZM";
+const supabaseKey = "YOUR_ANON_KEY_HERE";
 
-window.mySupabase = window.supabase.createClient(
+const db = window.supabase.createClient(
     supabaseUrl,
     supabaseKey
 );
 
 async function testConnection() {
+
     const { data, error } = await db
-    .from('leads')
-    .select('*');
+        .from('leads')
+        .select('*');
 
-    console.log(data);
-    console.log(error);
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
 
-    if (!error) {
+    if (error) {
+        alert("Supabase Error: " + error.message);
+    } else {
         alert("Supabase Connected!");
     }
 }
 
 testConnection();
 </script>
-
 </body>
 </html>
