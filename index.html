@@ -993,5 +993,39 @@ Swift Equity Solutions LLC`;
         function handleLogin() { document.getElementById("auth-screen").style.display = "none"; }
         function handleLogout() { document.getElementById("auth-screen").style.display = "flex"; }
     </script>
+    <script>
+   // all your existing CRM code
+</script>
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl = "YOUR_API_URL";
+const supabaseKey = "YOUR_PUBLISHABLE_KEY";
+
+const supabase = window.supabase.createClient(
+    supabaseUrl,
+    supabaseKey
+);
+
+async function testConnection() {
+    const { data, error } = await supabase
+        .from('leads')
+        .select('*');
+
+    console.log(data);
+    console.log(error);
+
+    if (!error) {
+        alert("Supabase Connected!");
+    }
+}
+
+testConnection();
+</script>
+
+</body>
+</html>
 </body>
 </html>
