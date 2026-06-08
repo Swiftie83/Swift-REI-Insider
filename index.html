@@ -1011,9 +1011,9 @@ window.mySupabase = window.supabase.createClient(
 );
 
 async function testConnection() {
-    const { data, error } = await supabase
-        .from('leads')
-        .select('*');
+    const { data, error } = await db
+    .from('leads')
+    .select('*');
 
     console.log(data);
     console.log(error);
