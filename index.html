@@ -1001,12 +1001,14 @@ Swift Equity Solutions LLC`;
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "YOUR_API_URL";
-const supabaseKey = "YOUR_PUBLISHABLE_KEY";
+const supabaseUrl = "https://ueczqlsksvocohglmdkg.supabase.co";
+
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlY3pxbHNrc3ZvY29oZ2xtZGtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NjYxNDksImV4cCI6MjA5NjQ0MjE0OX0.WsP2fxmpaIEKCrbBtRdM1p9pl5INcn4YaInWafkBoZM";
 
 const supabase = window.supabase.createClient(
     supabaseUrl,
     supabaseKey
+);
 );
 
 async function testConnection() {
