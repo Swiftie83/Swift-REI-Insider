@@ -3,522 +3,774 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Swift REI Insider™ | Enterprise CRM Dashboard (Fixed)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Swift REI Insider™ — Master Acquisition Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-main: #0b0f19;
-            --bg-surface: #151b2c;
-            --bg-card: #1e2640;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --primary: #10b981;
-            --primary-hover: #059669;
-            --accent: #3b82f6;
-            --border: #2d3748;
-            --danger: #ef4444;
-            --warning: #f59e0b;
+            --bg-main: #0B0F19;
+            --bg-card: #151D30;
+            --bg-input: #1F2A45;
+            --primary: #2563EB;
+            --primary-hover: #1D4ED8;
+            --accent: #10B981;
+            --text-main: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --border: #243356;
+            --panel-width: 320px;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
-
-        /* --- AUTH WALL --- */
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: var(--bg-main); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .stage-column { width: 300px; min-width: 300px; }
         #auth-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(11,15,25,0.98); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
         }
         .auth-box {
-            background: var(--bg-surface); padding: 2.5rem; border-radius: 0.75rem; 
-            border: 1px solid var(--border); width: 100%; max-width: 400px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 2.5rem; border-radius: 1rem; width: 420px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
         }
-
-        /* --- SIDEBAR LAYOUT --- */
-        aside { width: 260px; background-color: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; }
-        .logo-area { display: flex; align-items: center; gap: 0.75rem; font-size: 1.25rem; font-weight: 700; color: #fff; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
-        .logo-area span { color: var(--primary); }
-        .nav-links { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; }
-        .nav-btn { width: 100%; display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--text-muted); background: none; border: none; border-radius: 0.5rem; cursor: pointer; text-align: left; font-size: 0.95rem; font-weight: 500; transition: all 0.2s; }
-        .nav-btn:hover, .nav-btn.active { color: #fff; background-color: var(--bg-card); }
-        .nav-btn.active { border-left: 4px solid var(--primary); }
-        .admin-only { display: none; border-left: 4px solid var(--accent) !important; }
-        .sidebar-footer { font-size: 0.75rem; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border); padding-top: 1rem; }
-
-        /* --- MAIN CORES --- */
-        main { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-        header { background-color: var(--bg-surface); padding: 1.25rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .view-section { padding: 2rem; flex-grow: 1; overflow-y: auto; display: none; }
-        .view-section.active { display: block; }
-        h2 { font-size: 1.75rem; margin-bottom: 1.5rem; font-weight: 600; }
-        h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; color: #fff; }
-
-        /* --- CARDS & KANBAN --- */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background-color: var(--bg-surface); padding: 1.25rem; border-radius: 0.75rem; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .stat-val { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
-
-        .pipeline-board { display: grid; grid-template-columns: repeat(5, minmax(270px, 1fr)); gap: 1rem; align-items: start; overflow-x: auto; padding-bottom: 1rem; }
-        .pipeline-col { background-color: var(--bg-surface); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border); min-height: 530px; }
-        .col-header { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; display: flex; justify-content: space-between; }
-        
-        .deal-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
-        .deal-card:hover { transform: translateY(-2px); border-color: var(--primary); }
-        .deal-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.4rem; }
-        
-        .badge-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.6rem; }
-        .deal-tag { font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-weight: 500; }
-        .tag-market { background: #2d3748; color: #fff; }
-        .tag-role { background: #1e3a8a; color: #93c5fd; }
-        .tag-source { background: #5b21b6; color: #f3e8ff; }
-        
-        .deal-meta { font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem; }
-
-        /* --- FORMS & TABLES --- */
-        .panel-card { background-color: var(--bg-surface); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border); margin-bottom: 1.5rem; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.4rem; }
-        input, select, textarea { width: 100%; background-color: var(--bg-main); border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.65rem; color: #fff; font-size: 0.95rem; }
-        input:focus, select:focus { outline: none; border-color: var(--primary); }
-        
-        .matrix-table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 0.5rem; font-size: 0.9rem; }
-        .matrix-table th, .matrix-table td { padding: 0.75rem 1rem; border: 1px solid var(--border); }
-        .matrix-table th { background-color: var(--bg-card); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
-
-        .matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(48%, 1fr)); gap: 1.5rem; }
-
-        /* --- DISPO DESK MATRIX --- */
-        .dispo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
-        .dispo-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; border-top: 4px solid var(--accent); }
-
-        /* --- MODALS --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 1000; }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; width: 90%; max-width: 620px; padding: 2rem; position: relative; max-height: 90vh; overflow-y: auto; }
-        .close-modal { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); cursor: pointer; }
-
-        /* --- ADMIN ROSTER GRID --- */
-        .admin-roster-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem; }
-        .roster-card { background: var(--bg-card); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border); }
-        .roster-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .roster-list-item:last-child { border-bottom: none; }
-        .btn-delete-operator { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 2px; }
-        .btn-delete-operator:hover { text-decoration: underline; }
-        .loading-toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); padding: 8px 16px; border-radius: 40px; font-size: 0.8rem; z-index: 1100; border-left: 3px solid var(--primary); }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+            color: #fff; padding: 0.65rem 0.85rem; border-radius: 0.5rem; font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        .form-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
+        .active-tab { background: var(--primary) !important; color: #fff !important; }
+        .metric-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.25rem; }
     </style>
 </head>
-<body>
+<body class="h-screen flex flex-col antialiased">
 
-    <div id="auth-screen">
-        <div class="auth-box">
-            <h2 style="font-size:1.4rem; text-align:center; margin-bottom:1rem;">Swift Equity Access System</h2>
-            <div class="form-group">
-                <label>Email ID</label>
-                <input type="email" id="auth-email" placeholder="admin@swiftequity.com">
+<div id="auth-screen">
+    <div class="auth-box">
+        <div class="flex justify-center mb-4">
+            <div class="bg-blue-600/20 p-3 rounded-full text-blue-500">
+                <i data-lucide="shield-check" class="w-8 h-8"></i>
             </div>
-            <div class="form-group">
-                <label>System Password</label>
-                <input type="password" id="auth-password" placeholder="••••••••">
-            </div>
-            <button style="width:100%; background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer;" onclick="handleLogin()">Authenticate Securely</button>
-            <div id="db-status" style="margin-top: 12px; font-size: 0.7rem; text-align: center; color: var(--text-muted);"></div>
+        </div>
+        <h2 style="font-size:1.4rem; text-align:center; margin-bottom:0.25rem; font-weight:700;">Swift Equity Access System</h2>
+        <p class="text-xs text-center text-gray-400 mb-6">Enter system credentials to authenticate session</p>
+        
+        <div class="form-group">
+            <label>System Username</label>
+            <input type="text" id="auth-username" placeholder="Enter custom username...">
+        </div>
+        <div class="form-group">
+            <label>System Password</label>
+            <input type="password" id="auth-password" placeholder="••••••••">
+        </div>
+        <button style="width:100%; background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer; margin-top:0.5rem;" onclick="handleLogin()">Authenticate Securely</button>
+    </div>
+</div>
+
+<header class="h-16 border-b flex items-center justify-between px-6 shrink-0" style="background: var(--bg-card); border-color: var(--border);">
+    <div class="flex items-center gap-3">
+        <div class="bg-blue-600 text-white p-2 rounded-lg font-black tracking-tighter text-lg shadow-md shadow-blue-900/30">SES</div>
+        <div>
+            <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">Swift REI Insider™ <span class="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30">v4.2 PRO</span></h1>
+            <p class="text-[11px] text-gray-400">Enterprise Asset Acquisition & Pipeline Environment</p>
         </div>
     </div>
-
-    <aside>
-        <div>
-            <div class="logo-area">
-                <i data-lucide="shield-check"></i>
-                <div>Swift <span>REI Insider™</span></div>
-            </div>
-            <nav class="nav-links">
-                <button class="nav-btn active" id="btn-nav-pipeline" onclick="switchView('pipeline')">
-                    <i data-lucide="layout-dashboard"></i> Pipeline Tracking
-                </button>
-                <button class="nav-btn" id="btn-nav-matrix" onclick="switchView('matrix')">
-                    <i data-lucide="users"></i> Management Matrices
-                </button>
-                <button class="nav-btn" id="btn-nav-dispo" onclick="switchView('dispo')">
-                    <i data-lucide="gantt-chart-square"></i> Dispo Desk Space
-                </button>
-                <button class="nav-btn admin-only" id="btn-nav-admin" onclick="switchView('admin')">
-                    <i data-lucide="sliders"></i> System Admin Console
-                </button>
-            </nav>
+    
+    <div class="flex items-center gap-4">
+        <div class="text-right">
+            <p class="text-xs font-semibold text-gray-300" id="user-display-email">@AUTHENTICATING...</p>
+            <p class="text-[10px] text-emerald-400 font-medium flex items-center justify-end gap-1"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span> Live Cloud Synced</p>
         </div>
-        <div class="sidebar-footer">
-            <div id="user-display-email" style="margin-bottom: 0.25rem; color:#fff; font-weight:500;"></div>
-            <div style="margin-bottom: 0.75rem; color:var(--text-muted); font-size:0.8rem;">swiftequitysolutions@gmail.com</div>
-            <button onclick="handleLogout()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.8rem;">Disconnect Terminal</button>
+        <button onclick="handleLogout()" class="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition" title="Disconnect Terminal Session">
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+        </button>
+    </div>
+</header>
+
+<div class="flex flex-1 overflow-hidden">
+    <nav class="w-64 border-r flex flex-col justify-between shrink-0" style="background: var(--bg-card); border-color: var(--border);">
+        <div class="p-4 space-y-1">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-gray-500 px-3 mb-2">Primary Workspaces</p>
+            <button onclick="switchTab('pipeline')" id="tab-btn-pipeline" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium active-tab text-gray-300 hover:bg-slate-800 transition">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Asset Pipeline Board
+            </button>
+            <button onclick="switchTab('underwrite')" id="tab-btn-underwrite" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-slate-800 transition">
+                <i data-lucide="calculator" class="w-4 h-4"></i> Live Underwriting Desk
+            </button>
+            <button onclick="switchTab('metrics')" id="tab-btn-metrics" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-slate-800 transition">
+                <i data-lucide="trending-up" class="w-4 h-4"></i> Performance Analytics
+            </button>
+            <button onclick="switchTab('dispo')" id="tab-btn-dispo" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-slate-800 transition">
+                <i data-lucide="building-2" class="w-4 h-4"></i> Disposition Exchange
+            </button>
+            <button onclick="switchTab('admin')" id="tab-btn-admin" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-slate-800 transition admin-only hidden">
+                <i data-lucide="sliders" class="w-4 h-4"></i> System Admin Console
+            </button>
         </div>
-    </aside>
-
-    <main>
-        <header>
-            <div id="header-title" style="font-weight:600; font-size:1.2rem;">Acquisitions Command Center</div>
-            <button style="background:var(--primary); color:#fff; padding:0.75rem 1.5rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer;" onclick="openModal('add-lead-modal')"><i data-lucide="plus" style="display:inline; vertical-align:middle; margin-right:5px;"></i> Log Property File</button>
-        </header>
-
-        <section id="view-pipeline" class="view-section active">
-            <div class="stats-grid">
-                <div class="stat-card"><div><label>Active Leads Sourced</label><div class="stat-val" id="stat-active">0</div></div><i data-lucide="home" style="color: var(--accent)"></i></div>
-                <div class="stat-card"><div><label>Pipeline Closed Revenue</label><div class="stat-val" style="color: var(--primary)" id="stat-volume">$0</div></div><i data-lucide="dollar-sign" style="color: var(--primary)"></i></div>
+        
+        <div class="p-4 border-t" style="border-color: var(--border);">
+            <div class="bg-slate-900/60 rounded-lg p-3 text-center border border-slate-800">
+                <p class="text-[11px] text-gray-400">Current Global Market Focus</p>
+                <p class="text-xs font-bold text-blue-400 mt-0.5">DETROIT • TEXAS • FLORIDA • CA</p>
             </div>
-            <div class="pipeline-board" id="pipeline-board-container"></div>
-        </section>
+        </div>
+    </nav>
 
-        <section id="view-matrix" class="view-section">
-            <h2>Organizational Matrix Performance Ledger</h2>
-            <div class="panel-card">
-                <h3>Log Manager Metric Entry</h3>
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; align-items:end;">
-                    <div class="form-group"><label>Role</label><select id="metric-role-select" onchange="toggleMetricInputs()"><option value="leadManager">Lead Manager (LM)</option><option value="acqManager">Acquisitions Manager (AM)</option><option value="dispoManager">Disposition Manager (DM)</option><option value="transCoordinator">Transaction Coordinator (TC)</option></select></div>
-                    <div class="form-group"><label>Manager Name</label><select id="metric-manager-name"></select></div>
-                    <div class="form-group" id="field-box-1"><label id="lbl-field-1">Stat 1</label><input type="number" id="val-field-1" value="0"></div>
-                    <div class="form-group" id="field-box-2"><label id="lbl-field-2">Stat 2</label><input type="number" id="val-field-2" value="0"></div>
-                    <div class="form-group" id="field-box-3"><label id="lbl-field-3">Stat 3</label><input type="number" id="val-field-3" value="0"></div>
-                    <div class="form-group"><button style="background:var(--accent); color:#fff; padding:0.65rem; border:none; border-radius:0.5rem; width:100%; cursor:pointer; font-weight:600;" onclick="submitRoleActivityMetrics()">Push Stats</button></div>
+    <main class="flex-1 flex flex-col overflow-hidden bg-[#080B11]">
+        <div id="view-pipeline" class="flex-1 flex flex-col overflow-hidden">
+            <div class="p-6 border-b shrink-0 flex items-center justify-between" style="border-color: var(--border); background: rgba(21,29,48,0.3);">
+                <div>
+                    <h2 class="text-xl font-bold tracking-tight text-white">Deal Tracking Flow-Board</h2>
+                    <p class="text-xs text-gray-400">Drag and manage acquisition portfolios across organizational pipelines</p>
+                </div>
+                <button onclick="openLeadModal('new')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg shadow-blue-900/40 transition">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Intest New Acquisition Lead
+                </button>
+            </div>
+            
+            <div id="pipeline-board-container" class="flex-1 overflow-x-auto p-6 flex gap-6 items-start custom-scroll">
+                </div>
+        </div>
+
+        <div id="view-underwrite" class="flex-1 overflow-y-auto p-6 hidden space-y-6 custom-scroll">
+            <div class="p-6 border-b shrink-0 flex items-center justify-between rounded-xl" style="border-color: var(--border); background: var(--bg-card);">
+                <div>
+                    <h2 class="text-xl font-bold tracking-tight text-white">Institutional MAO Engine</h2>
+                    <p class="text-xs text-gray-400">Calculates precise parameters using strict regional filtering strategies</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-md">60% Standard MAO Rule Enabled (CA: 80-85%)</span>
                 </div>
             </div>
-            <div class="matrix-grid">
-                <div class="panel-card"><h3>Lead Managers</h3><table class="matrix-table"><thead><tr><th>Operator</th><th>Inbound Calls</th><th>Outbound Sourced</th><th>Leads Qualified</th></tr></thead><tbody id="tbl-leadManager"></tbody></table></div>
-                <div class="panel-card"><h3>Acquisitions Managers</h3><table class="matrix-table"><thead><tr><th>Operator</th><th>Offers Sent</th><th>Follow-ups</th><th>Contracts</th></tr></thead><tbody id="tbl-acqManager"></tbody></table></div>
-                <div class="panel-card"><h3>Disposition Managers</h3><table class="matrix-table"><thead><tr><th>Operator</th><th>Buyer Blasts</th><th>Walkthroughs</th><th>Deals Assigned</th></tr></thead><tbody id="tbl-dispoManager"></tbody></table></div>
-                <div class="panel-card"><h3>Transaction Coordinators</h3><table class="matrix-table"><thead><tr><th>Operator</th><th>EMD Audits</th><th>Title Clearances</th><th>Closings</th></tr></thead><tbody id="tbl-transCoordinator"></tbody></table></div>
-            </div>
-        </section>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1 space-y-4 bg-[var(--bg-card)] p-6 rounded-xl border" style="border-color: var(--border);">
+                    <h3 class="text-sm font-bold tracking-wide text-blue-400 uppercase">Property Parameters</h3>
+                    <div class="form-group">
+                        <label>Asset Target Market</label>
+                        <select id="uw-market" onchange="runLiveUnderwritingCalculation()">
+                            <option value="Detroit, MI">Detroit, MI</option>
+                            <option value="Texas Regional">Texas Regional</option>
+                            <option value="Florida Markets">Florida Markets</option>
+                            <option value="California Prime">California Prime</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Property Layout Style</label>
+                        <select id="uw-type" onchange="runLiveUnderwritingCalculation()">
+                            <option value="Single Family">Single Family Home</option>
+                            <option value="Multi-Family">Multi-Family Portfolio</option>
+                            <option value="Commercial/Condo">Commercial / Condominium</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Beds Count</label>
+                        <select id="uw-beds" onchange="runLiveUnderwritingCalculation()">
+                            <option value="1">1 Bedroom (Warning Filter)</option>
+                            <option value="2">2 Bedrooms</option>
+                            <option value="3" selected>3 Bedrooms</option>
+                            <option value="4+">4+ Bedrooms</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>After Repair Value (ARV)</label>
+                        <input type="number" id="uw-arv" value="250000" oninput="runLiveUnderwritingCalculation()">
+                    </div>
+                    <div class="form-group">
+                        <label>Estimated Repair Overhead</label>
+                        <input type="number" id="uw-repairs" value="45000" oninput="runLiveUnderwritingCalculation()">
+                    </div>
+                    <div class="form-group">
+                        <label>Target Assignment Wholesale Fee</label>
+                        <input type="number" id="uw-wholesale" value="15000" oninput="runLiveUnderwritingCalculation()">
+                    </div>
+                    <div class="form-group">
+                        <label>Buyer Margin Buffer Buffer (%)</label>
+                        <select id="uw-buffer" onchange="runLiveUnderwritingCalculation()">
+                            <option value="10">10% Low Exposure</option>
+                            <option value="12" selected>12% Standard Allocation</option>
+                            <option value="15">15% Aggressive Shielding</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                            <p class="text-xs text-gray-400">Maximum Allowable Offer (MAO)</p>
+                            <p class="text-3xl font-black text-emerald-400 mt-1" id="out-mao">$0</p>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-center">
+                            <p class="text-xs text-gray-400">Calculated Buffer Protection</p>
+                            <p class="text-xl font-bold text-gray-200 mt-1" id="out-buffer-cash">$0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-[var(--bg-card)] p-6 rounded-xl border space-y-4" style="border-color: var(--border);" id="uw-alert-box">
+                        <h4 class="text-sm font-bold flex items-center gap-2 text-white"><i data-lucide="shield-alert" class="w-4 h-4 text-emerald-400"></i> Quality Control Diagnostics</h4>
+                        <p class="text-xs text-gray-400" id="uw-diagnostics-log">System clear. Formulas tracking safely inside normal performance envelopes.</p>
+                    </div>
 
-        <section id="view-dispo" class="view-section"><h2>Disposition Desk Matrix</h2><p style="color:var(--text-muted); margin-bottom:2rem;">Active inventory under contract or closed.</p><div class="dispo-grid" id="dispo-cards-container"></div></section>
-
-        <section id="view-admin" class="view-section">
-            <h2>System Admin Console</h2>
-            <div style="max-width: 900px;">
-                <div class="panel-card"><h3>Register New Manager</h3><div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;"><div class="form-group"><label>Full Name</label><input type="text" id="admin-manager-name" placeholder="Name"></div><div class="form-group"><label>Role</label><select id="admin-manager-role"><option value="leadManager">Lead Manager</option><option value="acqManager">Acquisitions Manager</option><option value="dispoManager">Disposition Manager</option><option value="transCoordinator">TC</option></select></div></div><button style="background:var(--primary); width:100%; padding:0.75rem; border:none; border-radius:0.5rem; cursor:pointer; font-weight:600;" onclick="addNewManagerToDatabase()">Add Profile</button></div>
-                <div class="panel-card"><h3>Active Personnel Roster</h3><div class="admin-roster-grid" id="admin-roster-display"></div></div>
+                    <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-4">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-blue-400">System Formula Verification Log</h4>
+                        <div class="bg-black/40 p-4 rounded-lg font-mono text-xs space-y-1.5 text-gray-300 border border-slate-950">
+                            <p id="formula-step-1">> Initializing regional risk adjustment check...</p>
+                            <p id="formula-step-2">> Base ARV Multiplier Set: 60%</p>
+                            <p id="formula-step-3">> Wholesale Fee Target Locked</p>
+                            <p id="formula-step-4">> Safe Entry Capital Output Evaluated</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </section>
+        </div>
+
+        <div id="view-metrics" class="flex-1 overflow-y-auto p-6 hidden space-y-6 custom-scroll">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold tracking-tight text-white">Performance KPIs & Metrics Desk</h2>
+                    <p class="text-xs text-gray-400">Real-time tracker analyzing operator production loops</p>
+                </div>
+                <div class="flex gap-2">
+                    <select id="metrics-role-filter" onchange="toggleMetricInputs()" class="bg-[var(--bg-input)] border border-[var(--border)] text-white text-xs rounded-lg p-2">
+                        <option value="cold_caller">Cold Callers Interface</option>
+                        <option value="acquisition_manager">Acquisitions View</option>
+                    </select>
+                    <button onclick="openMetricLogModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Log Shift Performance Metrics
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="metrics-kpi-row">
+                </div>
+
+            <div class="bg-[var(--bg-card)] border rounded-xl overflow-hidden" style="border-color: var(--border);">
+                <div class="p-4 border-b bg-slate-900/40" style="border-color: var(--border);">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">Historical Tracking Registry</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-900/80 text-gray-400 border-b" style="border-color: var(--border);">
+                                <th class="p-3.5 font-semibold">Operator Entity</th>
+                                <th class="p-3.5 font-semibold">Execution Role</th>
+                                <th class="p-3.5 font-semibold">Connected Metric Volume Logs</th>
+                                <th class="p-3.5 font-semibold">Output Value Parameters</th>
+                                <th class="p-3.5 font-semibold">Logged Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="metrics-table-body" class="divide-y divide-slate-800 text-gray-300">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-dispo" class="flex-1 overflow-y-auto p-6 hidden space-y-6 custom-scroll">
+            <div>
+                <h2 class="text-xl font-bold tracking-tight text-white">Disposition Desk Portal</h2>
+                <p class="text-xs text-gray-400">Review executed underwriting portfolios ready for distribution networks</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="dispo-grid-view">
+                </div>
+        </div>
+
+        <div id="view-admin" class="flex-1 overflow-y-auto p-6 hidden space-y-6 custom-scroll">
+            <div>
+                <h2 class="text-xl font-bold tracking-tight text-white">System Admin Console</h2>
+                <p class="text-xs text-gray-400">Configure global application variables, user nodes, and tracking rules</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-[var(--bg-card)] p-6 rounded-xl border space-y-4" style="border-color: var(--border);">
+                    <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wider">Provision Operator Profile</h3>
+                    <div class="form-group">
+                        <label>Personnel Full Identity Name</label>
+                        <input type="text" id="admin-manager-name" placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>System Assignment Operational Role</label>
+                        <select id="admin-manager-role">
+                            <option value="leadManager">Lead Manager (LM)</option>
+                            <option value="acquisitionManager">Acquisition Manager (AM)</option>
+                            <option value="dispoManager">Disposition Manager (DM)</option>
+                            <option value="coldCaller">Outbound Cold Caller (CC)</option>
+                        </select>
+                    </div>
+                    <button onclick="addNewManagerToDatabase()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs p-2.5 rounded-lg transition">Deploy Verified System Node</button>
+                </div>
+                
+                <div class="lg:col-span-2 bg-[var(--bg-card)] p-6 rounded-xl border space-y-4" style="border-color: var(--border);">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider">Active System Registry</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="text-gray-400 border-b border-slate-800">
+                                    <th class="pb-2">Personnel Entity</th>
+                                    <th class="pb-2">Assigned Role</th>
+                                    <th class="pb-2 text-right">Action Trace</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-roster-body" class="divide-y divide-slate-800 text-gray-300">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+</div>
 
-    <!-- MODALS -->
-    <div class="modal-overlay" id="add-lead-modal"><div class="modal-content"><button class="close-modal" onclick="closeModal('add-lead-modal')">✖</button><h3>Intake New Property Lead</h3><div class="form-group"><label>Address</label><input id="lead-address" placeholder="123 Main St"></div><div style="background:rgba(255,255,255,0.02); padding:1rem; border-radius:0.5rem;"><label>Seller Contact</label><div class="form-group"><input id="lead-seller-name" placeholder="Full Name"></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;"><div><input id="lead-seller-phone" placeholder="Phone"></div><div><input id="lead-seller-email" placeholder="Email"></div></div></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;"><div><label>Source</label><select id="lead-source"><option>Pre-Foreclosure</option><option>Tax Lien</option><option>Tired Landlord</option></select></div><div><label>Market</label><select id="lead-market" onchange="runLiveUnderwritingCalculation()"><option value="50% Region">50% MAO</option><option value="60% Region" selected>60% MAO</option><option value="70% Region">70% MAO</option><option value="80% Region">80% MAO</option></select></div></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;"><div><label>Property Type</label><select id="lead-prop-type"><option>Single Family</option><option>Multi-Family</option></select></div><div><label>Beds</label><select id="lead-beds"><option>2</option><option selected>3</option><option>4+</option></select></div></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;"><div><label>LM</label><select id="lead-lm-select"></select></div><div><label>AM</label><select id="lead-am-select"></select></div></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;"><div><label>ARV ($)</label><input id="lead-arv" value="250000" oninput="runLiveUnderwritingCalculation()"></div><div><label>Repairs ($)</label><input id="lead-repairs" value="35000" oninput="runLiveUnderwritingCalculation()"></div></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;"><div><label>Wholesale Fee ($)</label><input id="lead-wholesale" value="15000" oninput="runLiveUnderwritingCalculation()"></div><div><label>Buffer (12.5%)</label><input id="lead-buffer" disabled></div></div><div style="background:var(--bg-card); padding:1rem; border-radius:0.5rem;"><label>Target MAO</label><div id="live-mao-display" style="font-size:1.4rem; font-weight:700; color:var(--primary);">$0</div></div><button style="background:var(--primary); width:100%; padding:0.75rem; border:none; border-radius:0.5rem; cursor:pointer; margin-top:1rem;" onclick="submitNewLead()">Create Lead</button></div></div>
+<div id="lead-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div class="p-4 border-b flex items-center justify-between bg-slate-900/60" style="border-color: var(--border);">
+            <h3 class="text-base font-bold text-white" id="modal-title">Intest New Acquisition Lead Portfolio</h3>
+            <button onclick="closeLeadModal()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto space-y-4 custom-scroll flex-1 text-xs">
+            <input type="hidden" id="modal-lead-id">
+            <input type="hidden" id="modal-lead-stage" value="new">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group col-span-2">
+                    <label>Target Asset Street Address *</label>
+                    <input type="text" id="modal-address" placeholder="123 Main St, Detroit MI">
+                </div>
+                <div class="form-group">
+                    <label>Seller Profile Name</label>
+                    <input type="text" id="modal-seller-name" placeholder="Alex Johnson">
+                </div>
+                <div class="form-group">
+                    <label>Seller Phone Contact</label>
+                    <input type="text" id="modal-seller-phone" placeholder="(555) 000-0000">
+                </div>
+                <div class="form-group">
+                    <label>Seller Email Address</label>
+                    <input type="text" id="modal-seller-email" placeholder="alex@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label>Marketing Source channel</label>
+                    <input type="text" id="modal-source" placeholder="Cold Call / PPC / SMS">
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-800 pt-4 grid grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label>Target Core Market</label>
+                    <select id="modal-market" onchange="syncModalUnderwriteCalculations()">
+                        <option value="Detroit, MI">Detroit, MI</option>
+                        <option value="Texas Regional">Texas Regional</option>
+                        <option value="Florida Markets">Florida Markets</option>
+                        <option value="California Prime">California Prime</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Layout Style Specification</label>
+                    <select id="modal-type" onchange="syncModalUnderwriteCalculations()">
+                        <option value="Single Family">Single Family</option>
+                        <option value="Multi-Family">Multi-Family Portfolio</option>
+                        <option value="Commercial/Condo">Commercial / Condo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Beds Count</label>
+                    <select id="modal-beds" onchange="syncModalUnderwriteCalculations()">
+                        <option value="1">1 Bed (Underwrite Warning Block)</option>
+                        <option value="2">2 Beds</option>
+                        <option value="3" selected>3 Beds</option>
+                        <option value="4+">4+ Beds</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>After Repair Value (ARV)</label>
+                    <input type="number" id="modal-arv" value="0" oninput="syncModalUnderwriteCalculations()">
+                </div>
+                <div class="form-group">
+                    <label>Estimated Repair Overhead</label>
+                    <input type="number" id="modal-repairs" value="0" oninput="syncModalUnderwriteCalculations()">
+                </div>
+                <div class="form-group">
+                    <label>Target Wholesale Assignment Fee</label>
+                    <input type="number" id="modal-wholesale" value="0" oninput="syncModalUnderwriteCalculations()">
+                </div>
+                <div class="form-group">
+                    <label>Buyer Margin Buffer Allocation</label>
+                    <select id="modal-buffer" onchange="syncModalUnderwriteCalculations()">
+                        <option value="10">10% Low Profile</option>
+                        <option value="12" selected>12% Balanced Matrix</option>
+                        <option value="15">15% High Risk Exposure Cushion</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="text-emerald-400 font-bold">Auto Evaluated MAO Value Limit</label>
+                    <input type="number" id="modal-mao" value="0" class="bg-slate-900 border-emerald-500/30 text-emerald-400 font-bold" readonly>
+                </div>
+            </div>
 
-    <div class="modal-overlay" id="deal-modal"><div class="modal-content"><button class="close-modal" onclick="closeModal('deal-modal')">✖</button><h3 id="modal-deal-title">Lead Details</h3><div id="modal-badge-container" class="badge-row"></div><div style="background:rgba(255,255,255,0.03); padding:0.75rem; border-radius:0.5rem;"><div>Seller: <strong id="modal-seller-name">-</strong></div><div>Phone: <span id="modal-seller-phone">-</span> | Email: <span id="modal-seller-email">-</span></div></div><hr><div style="display:grid; grid-template-columns:1fr 1fr;"><div>Stage: <strong id="modal-deal-stage">-</strong></div><div>Source: <strong id="modal-deal-source">-</strong></div><div>Wholesale: <strong id="modal-deal-wholesale">-</strong></div><div>MAO: <strong id="modal-deal-mao">-</strong></div></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;"><div><label>Reassign LM</label><select id="modal-assign-lm"></select></div><div><label>Reassign AM</label><select id="modal-assign-am"></select></div></div><div id="modal-dispo-tc-assign-box" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;"><div><label>DM</label><select id="modal-assign-dm"></select></div><div><label>TC</label><select id="modal-assign-tc"></select></div></div><div id="dispo-notes-panel" style="display:none;"><div class="form-group"><label>Title Company</label><input id="modal-dispo-title-co" placeholder="Title Co"></div><div class="form-group"><label>Dispo Notes</label><textarea id="modal-dispo-notes" rows="2"></textarea></div></div><div style="display:flex; gap:0.5rem; justify-content:flex-end; border-top:1px solid var(--border); padding-top:1rem; margin-top:1rem;"><button style="background:var(--danger); margin-right:auto;" onclick="deleteActiveLeadFile()">Delete Lead</button><button onclick="closeModal('deal-modal')">Cancel</button><button id="btn-move-back" onclick="adjustPipelineDirection(-1)">← Back</button><button id="btn-move-forward" onclick="adjustPipelineDirection(1)">Advance →</button><button style="background:var(--accent);" onclick="saveLeadManagerAssignments()">Save</button><button onclick="generateOfferEmail()">Copy Offer</button></div></div></div>
+            <div class="border-t border-slate-800 pt-4 grid grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label>Assigned Lead Manager (LM)</label>
+                    <select id="modal-lm"></select>
+                </div>
+                <div class="form-group">
+                    <label>Assigned Acquisition Manager (AM)</label>
+                    <select id="modal-am"></select>
+                </div>
+                <div class="form-group">
+                    <label>Disposition Manager Node (DM)</label>
+                    <select id="modal-dm">
+                        <option value="Unassigned">Unassigned</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Preferred Title Company Node</label>
+                    <input type="text" id="modal-title-company" placeholder="Preferred Title Company Name...">
+                </div>
+            </div>
+            
+            <div class="form-group border-t border-slate-800 pt-4">
+                <label>Disposition Execution Strategy Logs</label>
+                <textarea id="modal-dispo-notes" rows="2" placeholder="Notes on end-buyer traction, adjustments, assignment tracking..."></textarea>
+            </div>
+        </div>
+        
+        <div class="p-4 border-t bg-slate-900/60 flex justify-end gap-3" style="border-color: var(--border);">
+            <button onclick="closeLeadModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-gray-300 font-medium hover:bg-slate-700 transition">Cancel</button>
+            <button onclick="saveLeadFromModalData()" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Commit Asset Row</button>
+        </div>
+    </div>
+</div>
 
-    <div id="loadingToast" class="loading-toast" style="display: none;">Syncing...</div>
+<div id="metric-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col text-xs">
+        <div class="p-4 border-b flex items-center justify-between bg-slate-900/60" style="border-color: var(--border);">
+            <h3 class="text-base font-bold text-white">Log Operational Performance Metrics</h3>
+            <button onclick="closeMetricLogModal()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="form-group">
+                <label>Select System Operator Node</label>
+                <select id="metmod-user"></select>
+            </div>
+            <div class="form-group">
+                <label>Active Shift Strategy Track</label>
+                <select id="metmod-role" onchange="adjustModalMetricTrackingInputs()">
+                    <option value="cold_caller">Outbound Cold Caller (CC)</option>
+                    <option value="acquisition_manager">Acquisition Manager (AM)</option>
+                </select>
+            </div>
+            
+            <div id="metmod-dynamic-fields" class="space-y-4">
+                </div>
+        </div>
+        <div class="p-4 border-t bg-slate-900/60 flex justify-end gap-3" style="border-color: var(--border);">
+            <button onclick="closeMetricLogModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-gray-300 font-medium hover:bg-slate-700 transition">Cancel Data Log</button>
+            <button onclick="submitOperatorShiftMetricsLog()" class="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition">Commit Analytics Entry</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        // ------------------- FIXED: No duplicate supabase, all functions global ------------------
-        // Supabase config (replace with your own key if desired, otherwise local mode works)
-        const SUPABASE_URL = "https://ueczqlsksvocohglmdkg.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlY3pxbHNrc3ZvY29oZ2xtZGtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIzNDU2NzgsImV4cCI6MjAyNzkyMTY3OH0.Z5S9ZVgGZ9k6a2Wc7Tm9p8WQ7nV2xLqMqzKjHxRjYkI";  // Placeholder - replace with actual anon key to enable real sync
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // Global Constants - Populated via user parameters 
+    const supabaseUrl = "https://iqsrrbvubziuhcxzuzob.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlxc3JyYnZ1YnppdWhjeHp1em9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1MDY3NTIsImV4cCI6MjA5NjUyNjc1Mn0.L6HXePC_HA8dTcTjM34AzCnQQxjWyKot-4oTdjPyXTc";
+
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Primary State Management Registries
+    let localLeadsMemory = [];
+    let applicationManagersArray = [
+        { id: 1, name: "Wilkens Branche", role: "acquisitionManager" },
+        { id: 2, name: "Sarah Jenkins", role: "leadManager" },
+        { id: 3, name: "Carlos Mendez", role: "coldCaller" },
+        { id: 4, name: "David Vance", role: "dispoManager" }
+    ];
+    let historicalPerformanceMetricsArray = [
+        { id: 1, user: "Carlos Mendez", role: "cold_caller", metrics: { calls: 240, contacts: 32, leads: 3 }, timestamp: "2026-06-05 17:00" },
+        { id: 2, user: "Wilkens Branche", role: "acquisition_manager", metrics: { offers_sent: 5, contracts_signed: 1, pipeline_value: 12000 }, timestamp: "2026-06-06 16:30" }
+    ];
+
+    const pipelineStagesDefinition = [
+        { id: "new", title: "New Intake Pipeline", color: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+        { id: "contacted", title: "Contact Established / Vetting", color: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
+        { id: "underwriting", title: "Underwrite Engine Analysis", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+        { id: "offer_sent", title: "Active Offer Submissions", color: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
+        { id: "contract_signed", title: "Contract Ratified (Escrow Locked)", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+        { id: "dead", title: "Archived Leads System", color: "bg-rose-500/10 text-rose-400 border-rose-500/20" }
+    ];
+
+    // System Orchestration Engine Hook
+    document.addEventListener("DOMContentLoaded", async () => {
+        lucide.createIcons();
+        runLiveUnderwritingCalculation();
         
-        let supabaseClient = null;
-        let useLocalStorage = true;
-        try {
-            if (SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes("dummy") && SUPABASE_ANON_KEY.length > 50) {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                useLocalStorage = false;
-                document.getElementById("db-status").innerHTML = "✅ Live Sync Active";
-            } else {
-                document.getElementById("db-status").innerHTML = "⚠️ Offline Mode (Local Storage)";
-            }
-        } catch(e) { console.warn(e); }
-        
-        // Global data
-        let leads = [];
-        let activeSelectedLeadId = null;
-        const pipelineOrder = ['new', 'underwriting', 'offer', 'contract', 'closed'];
-        
-        let managementRoster = {
-            leadManager: ["Sarah Jenkins", "Marcus Vance"],
-            acqManager: ["David Ross", "Elena Rostova"],
-            dispoManager: ["Chris Gable", "Brett Fowler"],
-            transCoordinator: ["Tanya Cross", "Kristi Vance"]
-        };
-        let metricLedgerData = {
-            leadManager: {"Sarah Jenkins": {f1:450, f2:120, f3:45}, "Marcus Vance":{f1:380, f2:95, f3:32}},
-            acqManager: {"David Ross":{f1:18, f2:64, f3:5}, "Elena Rostova":{f1:22, f2:80, f3:8}},
-            dispoManager: {"Chris Gable":{f1:14, f2:25, f3:4}, "Brett Fowler":{f1:9, f2:18, f3:2}},
-            transCoordinator: {"Tanya Cross":{f1:6, f2:6, f3:5}, "Kristi Vance":{f1:4, f2:4, f3:4}}
-        };
-        
-        // Helper loading toast
-        function setLoading(show) { document.getElementById("loadingToast").style.display = show ? "block" : "none"; }
-        
-        // Load leads from localStorage or Supabase
-        async function loadLeads() {
-            setLoading(true);
-            if (!useLocalStorage && supabaseClient) {
-                const { data, error } = await supabaseClient.from("leads").select("*");
-                if (!error && data && data.length) { leads = data; }
-                else { useFallbackData(); }
-            } else { useFallbackData(); }
-            setLoading(false);
-            renderPipeline();
-            renderDispoDeskView();
+        // Confirm User Authentication State
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            processAuthenticatedSession(session.user);
+        } else {
+            document.getElementById("auth-screen").style.display = "flex";
         }
-        function useFallbackData() {
-            const stored = localStorage.getItem("swift_leads");
-            if (stored) { leads = JSON.parse(stored); }
-            else {
-                leads = [
-                    { id: 1, address: "1428 Elm St, Detroit", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "", market: "60% Region", lm: "Sarah Jenkins", am: "David Ross", dm: "Unassigned", tc: "Unassigned", source: "Pre-Foreclosure", arv: 140000, repairs: 25000, wholesale: 12500, buffer: 17500, mao: 29000, stage: "new", propType: "Single Family", beds: "3", dispoNotes: "" },
-                    { id: 2, address: "992 Texas Ave, Houston", sellerName: "Maria Gonzales", sellerPhone: "(713) 555-8831", sellerEmail: "mgonz81@yahoo.com", titleCompany: "Lone Star Escrow", market: "60% Region", lm: "Marcus Vance", am: "Elena Rostova", dm: "Chris Gable", tc: "Tanya Cross", source: "Tax Lien", arv: 220000, repairs: 30000, wholesale: 15000, buffer: 27500, mao: 60000, stage: "closed", propType: "Single Family", beds: "3", dispoNotes: "Closed deal." }
-                ];
-            }
+    });
+
+    // Custom Masked Username Authentication Core
+    async function handleLogin() {
+        const username = document.getElementById("auth-username").value.trim().toLowerCase();
+        const password = document.getElementById("auth-password").value;
+
+        if (!username || !password) {
+            alert("Please supply valid identification credentials.");
+            return;
         }
-        function saveLeadsLocal() { localStorage.setItem("swift_leads", JSON.stringify(leads)); }
-        async function syncLead(lead) { saveLeadsLocal(); if(!useLocalStorage && supabaseClient) await supabaseClient.from("leads").upsert(lead, { onConflict: "id" }); }
-        async function deleteLeadRemote(id) { saveLeadsLocal(); if(!useLocalStorage && supabaseClient) await supabaseClient.from("leads").delete().eq("id", id); }
-        
-        // Core UI Functions
-        function renderPipeline() {
-            const container = document.getElementById("pipeline-board-container");
-            container.innerHTML = pipelineOrder.map(stg => `<div class="pipeline-col" id="col-${stg}"><div class="col-header">${stg.toUpperCase()} <span class="count">0</span></div></div>`).join('');
-            let closedRevenue = 0, activeCount = 0;
-            leads.forEach(lead => {
-                if(lead.stage === 'closed') closedRevenue += lead.wholesale;
-                else activeCount++;
-                const col = document.getElementById(`col-${lead.stage}`);
-                if(col){
-                    const card = document.createElement('div'); card.className = 'deal-card'; card.onclick = () => openDealModal(lead.id);
-                    card.innerHTML = `<div class="deal-title">${lead.address}</div><div style="font-size:0.8rem;">${lead.sellerName}</div><div class="badge-row"><span class="deal-tag tag-market">${lead.market}</span><span class="deal-tag tag-role">LM: ${lead.lm}</span></div><div class="deal-meta"><span>MAO: $${(lead.mao/1000).toFixed(0)}k</span><span style="color:var(--primary);">$${lead.wholesale.toLocaleString()}</span></div>`;
-                    col.appendChild(card);
-                }
-            });
-            document.getElementById('stat-active').innerText = activeCount;
-            document.getElementById('stat-volume').innerText = `$${closedRevenue.toLocaleString()}`;
-            pipelineOrder.forEach(stg => { const col=document.getElementById(`col-${stg}`); if(col) col.querySelector('.count').innerText = col.querySelectorAll('.deal-card').length; });
-        }
-        function renderDispoDeskView() {
-            const container = document.getElementById("dispo-cards-container");
-            const targets = leads.filter(l => l.stage === 'contract' || l.stage === 'closed');
-            if(!targets.length){ container.innerHTML = "<div>No inventory in disposition.</div>"; return; }
-            container.innerHTML = targets.map(lead => `<div class="dispo-card"><h4>${lead.address}</h4><div>Seller: ${lead.sellerName} | ${lead.sellerPhone}</div><div><span class="deal-tag tag-role">DM: ${lead.dm}</span> <span class="deal-tag tag-source">Fee: $${lead.wholesale.toLocaleString()}</span></div><div><strong>Title:</strong> ${lead.titleCompany || '—'}</div><div><strong>Notes:</strong> ${lead.dispoNotes || '—'}</div><button onclick="openDealModal(${lead.id})" style="margin-top:8px; background:var(--accent); border:none; padding:4px 12px; border-radius:4px; cursor:pointer;">Update</button></div>`).join('');
-        }
-        
-        // Form & Metrics helpers
-        function rebuildSelectors() {
-            const selects = ["lead-lm-select","lead-am-select","modal-assign-lm","modal-assign-am","modal-assign-dm","modal-assign-tc"];
-            selects.forEach(id => {
-                const el = document.getElementById(id); if(!el) return;
-                el.innerHTML = (id.includes("modal") ? `<option value="Unassigned">Unassigned</option>` : "");
-                managementRoster.leadManager.forEach(n => el.innerHTML += `<option value="${n}">${n}</option>`);
-                if(id.includes("am") || id === "lead-am-select") managementRoster.acqManager.forEach(n => el.innerHTML += `<option value="${n}">${n}</option>`);
-                if(id.includes("dm")) managementRoster.dispoManager.forEach(n => el.innerHTML += `<option value="${n}">${n}</option>`);
-                if(id.includes("tc")) managementRoster.transCoordinator.forEach(n => el.innerHTML += `<option value="${n}">${n}</option>`);
-            });
-            populateMetricManagers();
-        }
-        function populateMetricManagers() {
-            const role = document.getElementById("metric-role-select").value;
-            const sel = document.getElementById("metric-manager-name");
-            if(sel){ sel.innerHTML = ""; managementRoster[role].forEach(n => sel.innerHTML += `<option value="${n}">${n}</option>`); }
-        }
-        function toggleMetricInputs() { populateMetricManagers(); }
-        function submitRoleActivityMetrics() {
-            const role = document.getElementById("metric-role-select").value;
-            const name = document.getElementById("metric-manager-name").value;
-            const f1 = +document.getElementById("val-field-1").value || 0;
-            const f2 = +document.getElementById("val-field-2").value || 0;
-            const f3 = +document.getElementById("val-field-3").value || 0;
-            if(!metricLedgerData[role][name]) metricLedgerData[role][name] = {f1:0,f2:0,f3:0};
-            metricLedgerData[role][name].f1 += f1;
-            metricLedgerData[role][name].f2 += f2;
-            metricLedgerData[role][name].f3 += f3;
-            renderMetricsTables();
-            alert("Metrics updated.");
-        }
-        function renderMetricsTables() {
-            for(let role of ["leadManager","acqManager","dispoManager","transCoordinator"]){
-                const tbody = document.getElementById(`tbl-${role}`);
-                if(tbody){
-                    tbody.innerHTML = "";
-                    for(let name in metricLedgerData[role]){
-                        const s = metricLedgerData[role][name];
-                        tbody.innerHTML += `<tr><td><strong>${name}</strong></td><td>${s.f1}</td><td>${s.f2}</td><td style="color:var(--primary);">${s.f3}</td></tr>`;
-                    }
-                }
-            }
-        }
-        function addNewManagerToDatabase() {
-            const name = document.getElementById("admin-manager-name").value.trim();
-            const role = document.getElementById("admin-manager-role").value;
-            if(!name) return;
-            if(!managementRoster[role].includes(name)) {
-                managementRoster[role].push(name);
-                metricLedgerData[role][name] = {f1:0,f2:0,f3:0};
-                rebuildSelectors();
-                renderMetricsTables();
-                renderAdminRoster();
-                document.getElementById("admin-manager-name").value = "";
-            }
-        }
-        function removeManagerFromDatabase(role, name) {
-            if(confirm(`Remove ${name}?`)){
-                managementRoster[role] = managementRoster[role].filter(n => n !== name);
-                delete metricLedgerData[role][name];
-                rebuildSelectors();
-                renderMetricsTables();
-                renderAdminRoster();
-            }
-        }
-        function renderAdminRoster() {
-            const container = document.getElementById("admin-roster-display");
-            if(!container) return;
-            container.innerHTML = "";
-            for(let role of Object.keys(managementRoster)){
-                let card = document.createElement("div");
-                card.className = "roster-card";
-                card.innerHTML = `<h4 style="color:var(--accent);">${role}</h4>`;
-                managementRoster[role].forEach(n => {
-                    card.innerHTML += `<div class="roster-list-item"><span>${n}</span><button class="btn-delete-operator" onclick="removeManagerFromDatabase('${role}','${n}')">Clear</button></div>`;
-                });
-                container.appendChild(card);
-            }
-            lucide.createIcons();
-        }
-        function runLiveUnderwritingCalculation() {
-            const arv = +document.getElementById("lead-arv").value || 0;
-            const repairs = +document.getElementById("lead-repairs").value || 0;
-            const wholesale = +document.getElementById("lead-wholesale").value || 0;
-            const market = document.getElementById("lead-market").value;
-            let perc = 0.6;
-            if(market.includes("50%")) perc = 0.5;
-            if(market.includes("70%")) perc = 0.7;
-            if(market.includes("80%")) perc = 0.8;
-            const buffer = Math.round(arv * 0.125);
-            document.getElementById("lead-buffer").value = buffer;
-            const mao = Math.round((arv * perc) - repairs - wholesale - buffer);
-            document.getElementById("live-mao-display").innerHTML = mao > 0 ? `$${mao.toLocaleString()}` : "$0";
-            return { mao, buffer };
-        }
-        
-        // CRUD actions
-        window.submitNewLead = async function() {
-            const address = document.getElementById("lead-address").value.trim() || "New Asset";
-            const sellerName = document.getElementById("lead-seller-name").value.trim() || "Unknown";
-            const sellerPhone = document.getElementById("lead-seller-phone").value.trim() || "N/A";
-            const sellerEmail = document.getElementById("lead-seller-email").value.trim() || "N/A";
-            const source = document.getElementById("lead-source").value;
-            const market = document.getElementById("lead-market").value;
-            const propType = document.getElementById("lead-prop-type").value;
-            const beds = document.getElementById("lead-beds").value;
-            const lm = document.getElementById("lead-lm-select").value;
-            const am = document.getElementById("lead-am-select").value;
-            const arv = +document.getElementById("lead-arv").value;
-            const repairs = +document.getElementById("lead-repairs").value;
-            const wholesale = +document.getElementById("lead-wholesale").value;
-            const { mao, buffer } = runLiveUnderwritingCalculation();
-            if(beds === "2" && propType === "Single Family") { alert("2-bed Single Family excluded."); return; }
-            const newId = leads.length ? Math.max(...leads.map(l=>l.id)) + 1 : 100;
-            const newLead = { id: newId, address, sellerName, sellerPhone, sellerEmail, titleCompany: "", market, lm, am, dm: "Unassigned", tc: "Unassigned", source, arv, repairs, wholesale, buffer, mao, stage: "new", propType, beds, dispoNotes: "" };
-            leads.push(newLead);
-            await syncLead(newLead);
-            loadLeads();
-            closeModal('add-lead-modal');
-        };
-        window.deleteActiveLeadFile = async function() {
-            if(!activeSelectedLeadId) return;
-            const lead = leads.find(l=>l.id===activeSelectedLeadId);
-            if(confirm(`Delete ${lead?.address}?`)){
-                leads = leads.filter(l=>l.id !== activeSelectedLeadId);
-                await deleteLeadRemote(activeSelectedLeadId);
-                loadLeads();
-                closeModal('deal-modal');
-                activeSelectedLeadId = null;
-            }
-        };
-        window.saveLeadManagerAssignments = async function() {
-            const lead = leads.find(l=>l.id===activeSelectedLeadId);
-            if(!lead) return;
-            lead.lm = document.getElementById("modal-assign-lm").value;
-            lead.am = document.getElementById("modal-assign-am").value;
-            if(lead.stage === 'contract' || lead.stage === 'closed') {
-                lead.dispoNotes = document.getElementById("modal-dispo-notes").value;
-                lead.titleCompany = document.getElementById("modal-dispo-title-co").value.trim();
-                lead.dm = document.getElementById("modal-assign-dm").value;
-                lead.tc = document.getElementById("modal-assign-tc").value;
-            }
-            await syncLead(lead);
-            loadLeads();
-            closeModal('deal-modal');
-        };
-        window.adjustPipelineDirection = async function(dir) {
-            const lead = leads.find(l=>l.id===activeSelectedLeadId);
-            if(!lead) return;
-            const idx = pipelineOrder.indexOf(lead.stage);
-            const newIdx = idx + dir;
-            if(newIdx>=0 && newIdx<pipelineOrder.length){
-                lead.stage = pipelineOrder[newIdx];
-                await syncLead(lead);
-                loadLeads();
-                closeModal('deal-modal');
-            }
-        };
-        function openDealModal(id){
-            const lead = leads.find(l=>l.id===id);
-            if(!lead) return;
-            activeSelectedLeadId = id;
-            document.getElementById("modal-deal-title").innerHTML = lead.address;
-            document.getElementById("modal-seller-name").innerHTML = lead.sellerName;
-            document.getElementById("modal-seller-phone").innerHTML = lead.sellerPhone;
-            document.getElementById("modal-seller-email").innerHTML = lead.sellerEmail;
-            document.getElementById("modal-deal-stage").innerHTML = lead.stage;
-            document.getElementById("modal-deal-source").innerHTML = lead.source;
-            document.getElementById("modal-deal-wholesale").innerHTML = `$${lead.wholesale.toLocaleString()}`;
-            document.getElementById("modal-deal-mao").innerHTML = lead.mao > 0 ? `$${lead.mao.toLocaleString()}` : "$0";
-            document.getElementById("modal-assign-lm").value = lead.lm;
-            document.getElementById("modal-assign-am").value = lead.am;
-            const isContractOrClosed = (lead.stage === 'contract' || lead.stage === 'closed');
-            document.getElementById("dispo-notes-panel").style.display = isContractOrClosed ? "block" : "none";
-            document.getElementById("modal-dispo-tc-assign-box").style.display = isContractOrClosed ? "grid" : "none";
-            if(isContractOrClosed){
-                document.getElementById("modal-dispo-notes").value = lead.dispoNotes || "";
-                document.getElementById("modal-dispo-title-co").value = lead.titleCompany || "";
-                document.getElementById("modal-assign-dm").value = lead.dm;
-                document.getElementById("modal-assign-tc").value = lead.tc;
-            }
-            document.getElementById("btn-move-back").style.visibility = lead.stage === 'new' ? 'hidden' : 'visible';
-            document.getElementById("btn-move-forward").style.visibility = lead.stage === 'closed' ? 'hidden' : 'visible';
-            openModal('deal-modal');
-        }
-        function generateOfferEmail() {
-            const lead = leads.find(l=>l.id===activeSelectedLeadId);
-            if(lead){
-                navigator.clipboard.writeText(`Offer for ${lead.address}\nMAO: $${lead.mao.toLocaleString()}\nFee: $${lead.wholesale.toLocaleString()}`);
-                alert("Offer text copied.");
-            }
-        }
-        function switchView(v) {
-            document.querySelectorAll('.view-section').forEach(s=>s.classList.remove('active'));
-            document.getElementById(`view-${v}`).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-            document.getElementById(`btn-nav-${v}`).classList.add('active');
-        }
-        function openModal(id) { document.getElementById(id).classList.add("active"); lucide.createIcons(); }
-        function closeModal(id) { document.getElementById(id).classList.remove("active"); }
-        function handleLogin() { 
-            document.getElementById("auth-screen").style.display = "none";
-            document.getElementById("user-display-email").innerText = "admin@swiftequity.com";
-            document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
-            loadLeads();
-        }
-        function handleLogout() { document.getElementById("auth-screen").style.display = "flex"; }
-        
-        // Initialization
-        document.addEventListener("DOMContentLoaded", () => {
-            lucide.createIcons();
-            rebuildSelectors();
-            renderMetricsTables();
-            renderAdminRoster();
-            toggleMetricInputs();
-            runLiveUnderwritingCalculation();
-            // Preload demo leads into localStorage if empty
-            if(!localStorage.getItem("swift_leads")) useFallbackData(), saveLeadsLocal();
+
+        // Mask internal domain routing behind simple user inputs
+        const internalEmail = `${username}@swiftequity.internal`;
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: internalEmail,
+            password: password
         });
-    </script>
-</body>
-</html>
+
+        if (error) {
+            alert(`Authentication Failed: ${error.message}`);
+            return;
+        }
+
+        processAuthenticatedSession(data.user);
+    }
+
+    // Session Deployment Controller
+    function processAuthenticatedSession(user) {
+        document.getElementById("auth-screen").style.display = "none";
+        
+        const runtimeUsername = user.user_metadata.username || "Operator";
+        document.getElementById("user-display-email").innerText = `@${runtimeUsername.toUpperCase()}`;
+        
+        // Show administrative layers if matching credentials present
+        document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("hidden"));
+        
+        // Prime dynamic frontend panels
+        rebuildAllFormSelectorDropdowns();
+        renderPipeline();
+        renderPerformanceMetricsTables();
+        renderDispoDeskView();
+        renderAdminRosterProfiles();
+        toggleMetricInputs();
+    }
+
+    // Terminate Session Route
+    async function handleLogout() {
+        const { error } = await supabase.auth.signOut();
+        if (!error) {
+            document.getElementById("auth-screen").style.display = "flex";
+            document.getElementById("auth-username").value = "";
+            document.getElementById("auth-password").value = "";
+        }
+    }
+
+    // Automated Cloud Database Synchronization Check
+    async function testConnection() {
+        const { data, error } = await supabase.from("leads").select("*");
+        console.log("Supabase Data Connection Stream:", data);
+        if (error) {
+            console.error("Supabase Connection Warning:", error.message);
+        } else {
+            console.log("Database Connection Status: Handshake Confirmed!");
+        }
+    }
+
+    testConnection();
+
+    // Application Navigation State Matrix
+    function switchTab(targetTabId) {
+        ["pipeline", "underwrite", "metrics", "dispo", "admin"].forEach(view => {
+            const el = document.getElementById(`view-${view}`);
+            const btn = document.getElementById(`tab-btn-${view}`);
+            if(el) el.classList.add("hidden");
+            if(btn) btn.classList.remove("active-tab");
+        });
+        
+        document.getElementById(`view-${targetTabId}`).classList.remove("hidden");
+        document.getElementById(`tab-btn-${targetTabId}`).classList.add("active-tab");
+        lucide.createIcons();
+    }
+
+    // Rebuild Form Selectors
+    function rebuildAllFormSelectorDropdowns() {
+        const dropdownTargets = ["modal-lm", "modal-am", "metmod-user"];
+        dropdownTargets.forEach(id => {
+            const dropdown = document.getElementById(id);
+            if(!dropdown) return;
+            dropdown.innerHTML = "";
+            
+            let filteredList = applicationManagersArray;
+            if(id === "modal-lm") filteredList = applicationManagersArray.filter(m => m.role === "leadManager" || m.role === "acquisitionManager");
+            if(id === "modal-am") filteredList = applicationManagersArray.filter(m => m.role === "acquisitionManager");
+            
+            filteredList.forEach(m => {
+                const opt = document.createElement("option");
+                opt.value = m.name;
+                opt.innerText = m.name;
+                dropdown.appendChild(opt);
+            });
+        });
+    }
+
+    // Core Underwriting Calculation Engine Logic
+    function calculateMaoFormulaParameters(arv, repairs, wholesale, bufferPct, market, propType, beds) {
+        let baseMaoPct = 0.60; 
+        let logDiagnosticArray = [];
+        let executionErrorFlag = false;
+
+        // Strict Hard-Pass Real Estate Underwriting Rule Filter
+        if (propType === "Single Family" && beds === "2") {
+            logDiagnosticArray.push("CRITICAL COMPLIANCE AUDIT FAILURE: Single Family asset parameters fall inside 2-Bedroom Auto-Kill restriction protocols. Transaction Terminated.");
+            return { mao: 0, bufferCash: 0, logs: logDiagnosticArray, kill: true };
+        }
+
+        // California Prime Regional Target Real Estate Strategy Boost Override
+        if (market === "California Prime") {
+            baseMaoPct = 0.825; 
+            logDiagnosticArray.push("METROPOLITAN OVERRIDE: West Coast High-Exposure Tier detected. Shifting base metrics to 82.5% Target ARV baseline calculations.");
+        } else {
+            logDiagnosticArray.push(`REGIONAL PARAMETERS: Base strategy running standard 60% Maximum Allowable Offer calculation logic rules.`);
+        }
+
+        const calculatedBufferProtectionCash = arv * (bufferPct / 100);
+        const calculatedMaoTargetResult = (arv * baseMaoPct) - repairs - wholesale - calculatedBufferProtectionCash;
+
+        logDiagnosticArray.push(`Formula Matrix Execution: (${arv} * ${baseMaoPct * 100}%) - Repairs (${repairs}) - Wholesale Target Fee (${wholesale}) - Margin Buffer Protection (${calculatedBufferProtectionCash}).`);
+
+        return {
+            mao: Math.max(0, Math.round(calculatedMaoTargetResult)),
+            bufferCash: Math.round(calculatedBufferProtectionCash),
+            logs: logDiagnosticArray,
+            kill: false
+        };
+    }
+
+    // Dynamic Live Underwriting Console Interface Binder
+    function runLiveUnderwritingCalculation() {
+        const arv = parseFloat(document.getElementById("uw-arv").value) || 0;
+        const repairs = parseFloat(document.getElementById("uw-repairs").value) || 0;
+        const wholesale = parseFloat(document.getElementById("uw-wholesale").value) || 0;
+        const bufferPct = parseFloat(document.getElementById("uw-buffer").value) || 12;
+        const market = document.getElementById("uw-market").value;
+        const propType = document.getElementById("uw-type").value;
+        const beds = document.getElementById("uw-beds").value;
+
+        const results = calculateMaoFormulaParameters(arv, repairs, wholesale, bufferPct, market, propType, beds);
+
+        const outMao = document.getElementById("out-mao");
+        const outBuffer = document.getElementById("out-buffer-cash");
+        const diagnosticContainer = document.getElementById("uw-alert-box");
+        const diagnosticLogText = document.getElementById("uw-diagnostics-log");
+
+        outMao.innerText = `$${results.mao.toLocaleString()}`;
+        outBuffer.innerText = `$${results.bufferCash.toLocaleString()} Protection Asset Buffer Allocated`;
+
+        // Update verification script logs window
+        document.getElementById("formula-step-1").innerText = `> Initializing regional risk validation strategy for [${market.toUpperCase()}]`;
+        document.getElementById("formula-step-2").innerText = `> Property Layout Signature Pattern Verified: ${propType} (${beds} Beds configuration)`;
+        document.getElementById("formula-step-3").innerText = `> Calculated Secure Wholesale Target Fee Allotment: $${wholesale.toLocaleString()}`;
+        document.getElementById("formula-step-4").innerText = `> Evaluated Final MAO Target Vector Limit Result: $${results.mao.toLocaleString()}`;
+
+        if (results.kill) {
+            outMao.className = "text-3xl font-black text-rose-500 animate-pulse";
+            diagnosticContainer.className = "bg-rose-950/40 border border-rose-500/40 p-6 rounded-xl space-y-4";
+            diagnosticLogText.innerHTML = `<span class="font-bold text-rose-400">DEAL KILL ALGORITHM TRIGGERED:</span><br>${results.logs.join("<br>")}`;
+        } else {
+            outMao.className = "text-3xl font-black text-emerald-400";
+            diagnosticContainer.className = "bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4";
+            diagnosticLogText.innerHTML = `<span class="font-bold text-emerald-400">Asset Validation Verified:</span><br>${results.logs.join("<br>")}`;
+        }
+    }
+
+    // Modal Synchronizer Hook
+    function syncModalUnderwriteCalculations() {
+        const arv = parseFloat(document.getElementById("modal-arv").value) || 0;
+        const repairs = parseFloat(document.getElementById("modal-repairs").value) || 0;
+        const wholesale = parseFloat(document.getElementById("modal-wholesale").value) || 0;
+        const bufferPct = parseFloat(document.getElementById("modal-buffer").value) || 12;
+        const market = document.getElementById("modal-market").value;
+        const propType = document.getElementById("modal-type").value;
+        const beds = document.getElementById("modal-beds").value;
+
+        const results = calculateMaoFormulaParameters(arv, repairs, wholesale, bufferPct, market, propType, beds);
+        document.getElementById("modal-mao").value = results.mao;
+    }
+
+    // Pipeline Board Render Engine Logic
+    function renderPipeline() {
+        const container = document.getElementById("pipeline-board-container");
+        if(!container) return;
+        container.innerHTML = "";
+
+        pipelineStagesDefinition.forEach(stage => {
+            const column = document.createElement("div");
+            column.className = "stage-column bg-[#0D1424] border border-slate-800 rounded-xl flex flex-col max-h-[75vh] overflow-hidden shrink-0";
+            column.setAttribute("data-stage-id", stage.id);
+            column.ondragover = (e) => e.preventDefault();
+            column.ondrop = (e) => executePipelineDropEvent(e, stage.id);
+
+            const filteredLeads = localLeadsMemory.filter(l => l.stage === stage.id);
+
+            column.innerHTML = `
+                <div class="p-3 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between shrink-0">
+                    <span class="text-xs font-bold tracking-wide uppercase text-gray-300">${stage.title}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${stage.color}">${filteredLeads.length}</span>
+                </div>
+                <div class="p-3 overflow-y-auto flex-1 space-y-3 custom-scroll backend-dropzone" style="min-height:150px;"></div>
+            `;
+
+            const cardsBox = column.querySelector(".backend-dropzone");
+
+            filteredLeads.forEach(lead => {
+                const card = document.createElement("div");
+                card.className = "bg-[#161F33] border border-slate-800/80 rounded-lg p-3.5 shadow-md hover:border-slate-700 transition cursor-grab active:cursor-grabbing space-y-2.5 relative";
+                card.setAttribute("draggable", "true");
+                card.ondragstart = (e) => e.dataTransfer.setData("text/plain", lead.id);
+                card.onclick = () => loadLeadIntoModalModifierWorkspace(lead.id);
+
+                card.innerHTML = `
+                    <div>
+                        <p class="text-xs font-bold text-white tracking-tight line-clamp-1">${lead.address}</p>
+                        <p class="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-blue-500"></i> ${lead.market}</p>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] border-t border-slate-800/60 pt-2 text-gray-400">
+                        <span class="flex items-center gap-1"><i data-lucide="user" class="w-3 h-3 text-emerald-400"></i> AM: ${lead.am}</span>
+                        <span class="font-mono font-bold bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20">MAO: $${parseInt(lead.mao).toLocaleString()}</span>
+                    </div>
+                `;
+                cardsBox.appendChild(card);
+            });
+
+            container.appendChild(column);
+        });
+        lucide.createIcons();
+    }
+
+    // Drag and Drop State Controller
+    function executePipelineDropEvent(e, targetStageId) {
+        e.preventDefault();
+        const leadId = parseInt(e.dataTransfer.getData("text/plain"));
+        const match = localLeadsMemory.find(l => l.id === leadId);
+        if(match) {
+            match.stage = targetStageId;
+            renderPipeline();
+        }
+    }
+
+    // Lead Portfolio Modification Loader Hub
+    function loadLeadIntoModalModifierWorkspace(leadId) {
+        const lead = localLeadsMemory.
