@@ -1021,7 +1021,10 @@ const supabaseUrl = "https://oymrnlbuslisunopmvaf.supabase.co";
 
 const supabaseKey =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95bXJubGJ1c2xpc3Vub3BtdmFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzg1NzQsImV4cCI6MjA5NjYxNDU3NH0.7Fi5v8vE9lmKY97k99gK_9RCON0af0XBhQwJQpvgLLs";
-
+const supabase = window.supabase.createClient(
+    supabaseUrl,
+    supabaseKey
+);
 const { data, error } = await supabase
 .from("leads")
 .insert([{
