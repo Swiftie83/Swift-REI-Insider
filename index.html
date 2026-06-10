@@ -6,6 +6,10 @@
     <title>Swift REI Insider™ | Enterprise CRM Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
@@ -108,6 +112,20 @@
     </style>
 </head>
 <body>
+
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h2 style="font-size:1.4rem; text-align:center; margin-bottom:1rem;">Swift Equity Access System</h2>
+            <div class="form-group">
+                <label>Email ID</label>
+                <input type="email" id="auth-email" placeholder="admin@swiftequity.com">
+            </div>
+            <div class="form-group">
+                <label>System Password</label>
+                <input type="password" id="auth-password" placeholder="••••••••">
+            </div>
+            <button style="width:100%; background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer;" onclick="handleLogin()">Authenticate Securely</button>
+        </div>
     </div>
 
     <aside>
@@ -467,11 +485,11 @@
         };
 
         // Static Property Leads Tracking Base Data Arrays
-      leads.push({
+        let leads = [
             { id: 1, address: "1428 Elm St, Detroit MI", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "", market: "60% Region", lm: "Sarah Jenkins", am: "David Ross", dm: "Unassigned", tc: "Unassigned", source: "Pre-Foreclosure", arv: 140000, repairs: 25000, wholesale: 12500, buffer: 17500, mao: 29000, stage: "new", propType: "Single Family", beds: "3", dispoNotes: "" },
             { id: 2, address: "992 Texas Ave, Houston TX", sellerName: "Maria Gonzales", sellerPhone: "(713) 555-8831", sellerEmail: "mgonz81@yahoo.com", titleCompany: "Lone Star Escrow Services", market: "60% Region", lm: "Marcus Vance", am: "Elena Rostova", dm: "Chris Gable", tc: "Tanya Cross", source: "Tax Lien", arv: 220000, repairs: 30000, wholesale: 15000, buffer: 27500, mao: 60000, stage: "closed", propType: "Single Family", beds: "3", dispoNotes: "" },
             { id: 3, address: "4412 Citrus Dr, Tampa FL", sellerName: "Arthur Pendelton", sellerPhone: "(813) 555-4402", sellerEmail: "artiep@outlook.com", titleCompany: "Suncoast Title Partners", market: "70% Region", lm: "Sarah Jenkins", am: "David Ross", dm: "Chris Gable", tc: "Kristi Vance", source: "Tired Landlord", arv: 310000, repairs: 45000, wholesale: 22000, buffer: 38750, mao: 111250, stage: "contract", propType: "Multi-Family", beds: "4+", dispoNotes: "Blasted out to clear tier-1 cash list buyers. Execution pending inspection walk." }
-       ...})
+        ];
 
         const pipelineOrder = ['new', 'underwriting', 'offer', 'contract', 'closed'];
         let activeSelectedLeadId = null;
@@ -485,6 +503,8 @@
             renderAdminRosterProfiles();
             toggleMetricInputs();
             runLiveUnderwritingCalculation();
+            document.getElementById("auth-screen").style.display = "none";
+            document.getElementById("user-display-email").innerText = "admin-hq@swiftequity.com";
             document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
         });
 
@@ -970,6 +990,8 @@ Swift Equity Solutions LLC`;
 
         function openModal(modalId) { document.getElementById(modalId).classList.add("active"); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove("active"); }
+        function handleLogin() { document.getElementById("auth-screen").style.display = "none"; }
+        function handleLogout() { document.getElementById("auth-screen").style.display = "flex"; }
     </script>
     <script>
    // all your existing CRM code
@@ -990,7 +1012,7 @@ const supabase = window.supabase.createClient(
 );
 
 async function testConnection() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from("leads")
         .select("*");
 
