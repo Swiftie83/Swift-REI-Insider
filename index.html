@@ -485,6 +485,60 @@
 const supabaseUrl = "https://oymrnlbuslisunopmvaf.supabase.co";
 const supabaseKey = "sb_publishable_I5sAjM8dnPjYR2x8mHPwww_gI1o..."; 
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    // --- SWIFT REI AUTHENTICATION ENGINE ---
+
+// 1. Handle Team Member Sign In
+async function handleTeamLogin(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        alert("Authentication Failed: " + error.message);
+    } else {
+        alert("Access Granted. Welcome back to the Console!");
+        document.getElementById('authOverlayContainer').classList.add('hidden'); // Hide login wall
+        loadLiveSupabaseData(); // Refresh and pull the property pipeline
+    }
+}
+
+// 2. Handle First-Time Password Creation (For Invited Managers)
+async function handleFirstTimePassword(email, password) {
+    const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        alert("Account Setup Error: " + error.message);
+    } else {
+        alert("Password set successfully! You can now use these credentials to log in.");
+    }
+}
+
+// 3. Attach Event Listeners to Your Login UI Layout
+document.addEventListener("DOMContentLoaded", () => {
+    const loginButton = document.querySelector("#authOverlayContainer button");
+    const emailInput = document.querySelector("#authOverlayContainer input[type='email']");
+    const passwordInput = document.querySelector("#authOverlayContainer input[type='password']");
+
+    if (loginButton) {
+        loginButton.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                alert("Please fill out both your corporate email and password.");
+                return;
+            }
+
+            // Runs standard sign-in protocol
+            await handleTeamLogin(email, password);
+        });
+    }
+});
     // Primary Memory Registries
     let localLeadsMemory = [];
     let applicationManagersArray = [
