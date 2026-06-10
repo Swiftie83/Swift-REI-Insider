@@ -1023,19 +1023,34 @@ const supabaseKey =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95bXJubGJ1c2xpc3Vub3BtdmFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzg1NzQsImV4cCI6MjA5NjYxNDU3NH0.7Fi5v8vE9lmKY97k99gK_9RCON0af0XBhQwJQpvgLLs";
 
 const { data, error } = await supabase
-    .from("leads")
-    .select("*");
-async function testConnection() {
-    const { data, error } = await supabaseClient
-        .from("leads")
-        .select("*");
+.from("leads")
+.insert([{
+    address: address,
+    seller_name: sellerName,
+    seller_phone: sellerPhone,
+    seller_email: sellerEmail,
+    title_company: "",
+    market: market,
+    lm: lm,
+    am: am,
+    dm: "Unassigned",
+    tc: "Unassigned",
+    source: source,
+    arv: arv,
+    repairs: repairs,
+    wholesale: wholesale,
+    buffer: calcs.buffer,
+    mao: calcs.mao,
+    stage: "new",
+    prop_type: propType,
+    beds: beds,
+    dispo_notes: ""
+}]);
 
-    console.log("DATA:", data);
-    console.log("ERROR:", error);
-
-    if (!error) {
-        alert("Supabase Connected!");
-    }
+if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
 }
 
 testConnection();
