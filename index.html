@@ -72,7 +72,10 @@
             <label>System Password</label>
             <input type="password" id="auth-password" placeholder="••••••••">
         </div>
-        <button style="width:100%; background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer; margin-top:0.5rem;" onclick="handleLogin()">Authenticate Securely</button>
+        <button style="width:100%; background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer; margin-top:0.5rem;" 
+                onclick="handleTeamLogin(document.getElementById('auth-username').value.trim(), document.getElementById('auth-password').value)">
+            Authenticate Securely
+        </button>
     </div>
 </div>
 
@@ -138,7 +141,7 @@
             </div>
             
             <div id="pipeline-board-container" class="flex-1 overflow-x-auto p-6 flex gap-6 items-start custom-scroll">
-                </div>
+            </div>
         </div>
 
         <div id="view-underwrite" class="flex-1 overflow-y-auto p-6 hidden space-y-6 custom-scroll">
@@ -252,7 +255,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="metrics-kpi-row">
-                </div>
+            </div>
 
             <div class="bg-[var(--bg-card)] border rounded-xl overflow-hidden" style="border-color: var(--border);">
                 <div class="p-4 border-b bg-slate-900/40" style="border-color: var(--border);">
@@ -470,7 +473,7 @@
                 </select>
             </div>
             <div id="metmod-dynamic-fields" class="space-y-4">
-                </div>
+            </div>
         </div>
         <div class="p-4 border-t bg-slate-900/60 flex justify-end gap-3" style="border-color: var(--border);">
             <button onclick="closeMetricLogModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-gray-300 font-medium hover:bg-slate-700 transition">Cancel Data Log</button>
@@ -479,66 +482,48 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    // Global Constants
-const supabaseUrl = "https://oymrnlbuslisunopmvaf.supabase.co";
-const supabaseKey = "sb_publishable_I5sAjM8dnPjYR2x8mHPwww_gI1o..."; 
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    // Global Production Constants
+    const supabaseUrl = "https://oymrnlbuslisunopmvaf.supabase.co";
+    const supabaseKey = "sb_publishable_I5sAjM8dnPjYR2x8mHPwww_gI1o...";
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
     // --- SWIFT REI AUTHENTICATION ENGINE ---
-
-// 1. Handle Team Member Sign In
-async function handleTeamLogin(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-    });
-
-    if (error) {
-        alert("Authentication Failed: " + error.message);
-    } else {
-        alert("Access Granted. Welcome back to the Console!");
-        document.getElementById('authOverlayContainer').classList.add('hidden'); // Hide login wall
-        loadLiveSupabaseData(); // Refresh and pull the property pipeline
-    }
-}
-
-// 2. Handle First-Time Password Creation (For Invited Managers)
-async function handleFirstTimePassword(email, password) {
-    const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-    });
-
-    if (error) {
-        alert("Account Setup Error: " + error.message);
-    } else {
-        alert("Password set successfully! You can now use these credentials to log in.");
-    }
-}
-
-// 3. Attach Event Listeners to Your Login UI Layout
-document.addEventListener("DOMContentLoaded", () => {
-    const loginButton = document.querySelector("#authOverlayContainer button");
-    const emailInput = document.querySelector("#authOverlayContainer input[type='email']");
-    const passwordInput = document.querySelector("#authOverlayContainer input[type='password']");
-
-    if (loginButton) {
-        loginButton.addEventListener("click", async (e) => {
-            e.preventDefault();
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            if (!email || !password) {
-                alert("Please fill out both your corporate email and password.");
-                return;
-            }
-
-            // Runs standard sign-in protocol
-            await handleTeamLogin(email, password);
+    
+    // 1. Handle Team Member Sign In via production auth nodes
+    async function handleTeamLogin(email, password) {
+        if (!email || !password) {
+            alert("Please input both system email and password.");
+            return;
+        }
+        
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
         });
+
+        if (error) {
+            alert("Authentication Failed: " + error.message);
+        } else {
+            alert("Access Granted. Welcome back to the Console!");
+            processSuccessfulAuth(data.user.email);
+        }
     }
-});
+
+    // 2. Handle First-Time Password Creation (For Invited Managers)
+    async function handleFirstTimePassword(email, password) {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            alert("Account Setup Error: " + error.message);
+        } else {
+            alert("Password set successfully! You can now use these credentials to log in.");
+        }
+    }
+
     // Primary Memory Registries
     let localLeadsMemory = [];
     let applicationManagersArray = [
@@ -568,32 +553,20 @@ document.addEventListener("DOMContentLoaded", () => {
         adjustModalMetricTrackingInputs();
         setupDragAndDropContainers();
         
-        // Populate Dropdowns with initial personnel arrays
         repopulateModalPersonnelDropdowns();
         renderActiveRosterDatabaseTable();
 
-        // Check authentication fallback via mock/local setup or Supabase session tracking
         try {
             const { data, error } = await supabase.auth.getSession();
             if (data && data.session) {
                 processSuccessfulAuth(data.session.user.email);
             } else {
-                // If standard connection fails, allow admin mock fallback bypass for local testing environment
-                document.getElementById('user-display-email').innerText = "admin@swiftequity.internal";
+                document.getElementById('user-display-email').innerText = "OFFLINE — SECURITY LOCKOUT";
             }
         } catch(e) {
             console.log("Supabase Connection bypass warning.");
         }
     });
-
-    function handleLogin() {
-        const userField = document.getElementById('auth-username').value;
-        if(userField) {
-            processSuccessfulAuth(userField);
-        } else {
-            alert("Please input system access token credentials.");
-        }
-    }
 
     function processSuccessfulAuth(emailString) {
         document.getElementById('auth-screen').style.display = 'none';
@@ -602,6 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function handleLogout() {
+        supabase.auth.signOut();
         document.getElementById('auth-screen').style.display = 'flex';
         document.getElementById('auth-username').value = "";
         document.getElementById('auth-password').value = "";
@@ -636,28 +610,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const wholesaleFee = parseFloat(document.getElementById('uw-wholesale').value) || 0;
         const bufferPercent = parseFloat(document.getElementById('uw-buffer').value) || 0;
 
-        // Apply institutional thresholds: Standard is 60%, California Prime handles higher bounds safely
         let rulePercentage = 0.60;
         const ruleBadge = document.getElementById('mao-rule-badge');
         
         if (targetMarket === "California Prime") {
-            rulePercentage = 0.82; // Midpoint 80-85% standard allocations
+            rulePercentage = 0.82;
             if(ruleBadge) ruleBadge.innerText = "82% Institutional CA Prime Scaling Engaged";
         } else {
             if(ruleBadge) ruleBadge.innerText = "60% Standard MAO Rule Enabled";
         }
 
-        // Institutional Real Estate Formula Matrix: MAO = (ARV * Rule%) - Repairs - Wholesale Fee
         let calculatedMaoValue = (arvValue * rulePercentage) - repairValue - wholesaleFee;
         if(calculatedMaoValue < 0) calculatedMaoValue = 0;
 
-        // Protection buffer computation
         const cashCushionValue = arvValue * (bufferPercent / 100);
 
         document.getElementById('out-mao').innerText = `$${calculatedMaoValue.toLocaleString()}`;
         document.getElementById('out-buffer-cash').innerText = `$${cashCushionValue.toLocaleString()} Safe Allocation`;
 
-        // Diagnostic Quality Check
         const diagnosticsLog = document.getElementById('uw-diagnostics-log');
         const countBeds = document.getElementById('uw-beds').value;
 
@@ -670,7 +640,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Syncing underlying logic blocks inside the entry modals
     function syncModalUnderwriteCalculations() {
         const targetMarket = document.getElementById('modal-market').value;
         const arvValue = parseFloat(document.getElementById('modal-arv').value) || 0;
@@ -683,7 +652,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('modal-mao').value = calculatedMaoValue > 0 ? Math.round(calculatedMaoValue) : 0;
     }
 
-    // Programmatic Generation of Board Flow Board Pipelines
     function renderPipelineFlowBoardLanes() {
         const container = document.getElementById('pipeline-board-container');
         container.innerHTML = "";
@@ -724,7 +692,6 @@ document.addEventListener("DOMContentLoaded", () => {
         lucide.createIcons();
     }
 
-    // Native HTML5 Drag and Drop Handlers
     function setupDragAndDropContainers() {}
     function allowDropContainerEvent(ev) { ev.preventDefault(); }
     function handleLeadDragStarted(ev, leadId) { ev.dataTransfer.setData("text/plain", leadId); }
@@ -740,7 +707,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Modal Operations
     function openLeadModal(mode, leadId = null) {
         const modal = document.getElementById('lead-modal');
         modal.classList.remove('hidden');
@@ -796,7 +762,6 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.classList.remove('flex');
     }
 
-    // Modal Personnel Data Bindings
     function repopulateModalPersonnelDropdowns() {
         const lmSelect = document.getElementById('modal-lm');
         const amSelect = document.getElementById('modal-am');
@@ -815,7 +780,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Process Forms and Persist Rows
     async function saveLeadFromModalData() {
         const leadId = document.getElementById('modal-lead-id').value;
         const address = document.getElementById('modal-address').value;
@@ -856,7 +820,6 @@ document.addEventListener("DOMContentLoaded", () => {
         closeLeadModal();
     }
 
-    // Metrics Logging Strategy Context Engine
     function openMetricLogModal() {
         document.getElementById('metric-modal').classList.remove('hidden');
         document.getElementById('metric-modal').classList.add('flex');
@@ -957,7 +920,6 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         });
 
-        // Compute and inject global scorecard dashboard values dynamically
         const cardContainer = document.getElementById('metrics-kpi-row');
         if(filterVal === 'cold_caller') {
             cardContainer.innerHTML = `
@@ -976,12 +938,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Disposition Desk Rendering Engine
     function renderDispositionDeskPortal() {
         const grid = document.getElementById('dispo-grid-view');
         grid.innerHTML = "";
 
-        // Only render leads categorized inside advanced contract phases or marked ready for disposition networks
         const dispoLeads = localLeadsMemory.filter(l => l.stage === 'contract_signed' || l.assignedDM !== 'Unassigned');
 
         if(dispoLeads.length === 0) {
@@ -1013,7 +973,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // System Admin Operator Roster Provisions
     function addNewManagerToDatabase() {
         const nameField = document.getElementById('admin-manager-name');
         const roleField = document.getElementById('admin-manager-role');
@@ -1031,66 +990,4 @@ document.addEventListener("DOMContentLoaded", () => {
         repopulateModalPersonnelDropdowns();
     }
 
-    function renderActiveRosterDatabaseTable() {
-        const tbody = document.getElementById('admin-roster-body');
-        tbody.innerHTML = "";
-
-        applicationManagersArray.forEach(p => {
-            tbody.innerHTML += `
-                <tr class="border-b border-slate-900">
-                    <td class="py-2.5 font-bold text-white text-xs flex items-center gap-2"><i data-lucide="shield" class="w-3.5 h-3.5 text-blue-500"></i> ${p.name}</td>
-                    <td class="py-2.5 font-mono text-[10px] text-gray-400 uppercase">${p.role.replace(/([A-Z])/g, ' $1')}</td>
-                    <td class="py-2.5 text-right"><button onclick="removePersonnelNode(${p.id})" class="text-red-400 hover:text-red-300 text-[11px] font-medium transition">Revoke Access</button></td>
-                </tr>
-            `;
-        });
-        lucide.createIcons();
-    }
-
-    function removePersonnelNode(id) {
-        applicationManagersArray = applicationManagersArray.filter(p => p.id !== id);
-        renderActiveRosterDatabaseTable();
-        repopulateModalPersonnelDropdowns();
-    }
-
-    // Supabase Core Storage Integrations
-    async function syncDataPipelineWithSupabaseCloud() {
-        try {
-            const { data, error } = await supabase.from('rei_leads_pipeline').select('*');
-            if (error) throw error;
-            if (data && data.length > 0) {
-                localLeadsMemory = data;
-            } else {
-                // Instantiation fallback template data rows
-                localLeadsMemory = [
-                    { id: "mock_1", stage: "new", address: "8421 W Mcnichols Rd, Detroit, MI", sellerName: "Marcus Vance", sellerPhone: "313-555-8921", market: "Detroit, MI", type: "Single Family", beds: "3", arv: 85000, repairs: 22000, wholesale: 8000, calculatedMao: 21000, assignedLM: "Sarah Jenkins", assignedAM: "Wilkens Branche", assignedDM: "Unassigned", emd: 100 },
-                    { id: "mock_2", stage: "underwriting", address: "1424 San Pedro Ave, El Paso, TX", sellerName: "Elena Rodriguez", market: "Texas Regional", type: "Single Family", beds: "3", arv: 195000, repairs: 35000, wholesale: 12000, calculatedMao: 70000, assignedLM: "Sarah Jenkins", assignedAM: "Wilkens Branche", assignedDM: "Unassigned", emd: 100 }
-                ];
-            }
-            renderPipelineFlowBoardLanes();
-        } catch (err) {
-            console.warn("Supabase integration offline. Initializing console inside offline local memory sandboxed envelope.");
-            localLeadsMemory = [
-                { id: "mock_1", stage: "new", address: "8421 W Mcnichols Rd, Detroit, MI", sellerName: "Marcus Vance", sellerPhone: "313-555-8921", market: "Detroit, MI", type: "Single Family", beds: "3", arv: 85000, repairs: 22000, wholesale: 8000, calculatedMao: 21000, assignedLM: "Sarah Jenkins", assignedAM: "Wilkens Branche", assignedDM: "Unassigned", emd: 100 },
-                { id: "mock_2", stage: "underwriting", address: "1424 San Pedro Ave, El Paso, TX", sellerName: "Elena Rodriguez", market: "Texas Regional", type: "Single Family", beds: "3", arv: 195000, repairs: 35000, wholesale: 12000, calculatedMao: 70000, assignedLM: "Sarah Jenkins", assignedAM: "Wilkens Branche", assignedDM: "Unassigned", emd: 100 }
-            ];
-            renderPipelineFlowBoardLanes();
-        }
-    }
-
-    async function updateLeadDirectlyToSupabaseCloud(leadObj) {
-        try {
-            const { error } = await supabase.from('rei_leads_pipeline').upsert([leadObj]);
-            if(error) console.error("Cloud tracking transaction rejected:", error.message);
-        } catch (err) {
-            // Local state updates gracefully without dropping interface performance
-        }
-    }
-</script>
-
-<footer class="mt-auto py-2 bg-slate-950 border-t border-slate-900 text-center text-[10px] text-gray-600 font-medium">
-    All products are owned by Swift Equity Solutions.
-</footer>
-
-</body>
-</html>
+    function renderActive
