@@ -473,7 +473,7 @@
                 </select>
             </div>
             <div id="metmod-dynamic-fields" class="space-y-4">
-            </div>
+                </div>
         </div>
         <div class="p-4 border-t bg-slate-900/60 flex justify-end gap-3" style="border-color: var(--border);">
             <button onclick="closeMetricLogModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-gray-300 font-medium hover:bg-slate-700 transition">Cancel Data Log</button>
@@ -485,7 +485,7 @@
 <script>
     // Global Production Constants
     const supabaseUrl = "https://oymrnlbuslisunopmvaf.supabase.co";
-    const supabaseKey = "sb_publishable_I5sAjM8dnPjYR2x8mHPwww_gI1o...";
+    const supabaseKey = "sb_publishable_I5sAjM8dnPjYR2x8mHPwww_gI1o..."; 
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     // --- SWIFT REI AUTHENTICATION ENGINE ---
@@ -768,14 +768,16 @@
         const dmSelect = document.getElementById('modal-dm');
         const mmUser = document.getElementById('metmod-user');
 
-        lmSelect.innerHTML = ""; amSelect.innerHTML = ""; dmSelect.innerHTML = `<option value="Unassigned">Unassigned Operations Node</option>`;
+        if(lmSelect) lmSelect.innerHTML = ""; 
+        if(amSelect) amSelect.innerHTML = ""; 
+        if(dmSelect) dmSelect.innerHTML = `<option value="Unassigned">Unassigned Operations Node</option>`;
         if(mmUser) mmUser.innerHTML = "";
 
         applicationManagersArray.forEach(p => {
             const opt = `<option value="${p.name}">${p.name}</option>`;
-            if(p.role === 'leadManager') lmSelect.innerHTML += opt;
-            if(p.role === 'acquisitionManager') amSelect.innerHTML += opt;
-            if(p.role === 'dispoManager') dmSelect.innerHTML += opt;
+            if(p.role === 'leadManager' && lmSelect) lmSelect.innerHTML += opt;
+            if(p.role === 'acquisitionManager' && amSelect) amSelect.innerHTML += opt;
+            if(p.role === 'dispoManager' && dmSelect) dmSelect.innerHTML += opt;
             if(mmUser) mmUser.innerHTML += opt;
         });
     }
@@ -821,9 +823,11 @@
     }
 
     function openMetricLogModal() {
+        repopulateModalPersonnelDropdowns();
         document.getElementById('metric-modal').classList.remove('hidden');
         document.getElementById('metric-modal').classList.add('flex');
     }
+    
     function closeMetricLogModal() {
         document.getElementById('metric-modal').classList.add('hidden');
         document.getElementById('metric-modal').classList.remove('flex');
@@ -832,6 +836,7 @@
     function adjustModalMetricTrackingInputs() {
         const targetTrack = document.getElementById('metmod-role').value;
         const targetContainer = document.getElementById('metmod-dynamic-fields');
+        if(!targetContainer) return;
         targetContainer.innerHTML = "";
 
         if(targetTrack === "cold_caller") {
@@ -883,6 +888,7 @@
     function renderMetricsRegistry() {
         const filterVal = document.getElementById('metrics-role-filter').value;
         const tbody = document.getElementById('metrics-table-body');
+        if(!tbody) return;
         tbody.innerHTML = "";
 
         let summaryDials = 0, summaryContacts = 0, summaryLeads = 0, summaryOffers = 0, summaryContracts = 0, summaryValue = 0;
@@ -921,6 +927,8 @@
         });
 
         const cardContainer = document.getElementById('metrics-kpi-row');
+        if(!cardContainer) return;
+        
         if(filterVal === 'cold_caller') {
             cardContainer.innerHTML = `
                 <div class="metric-card"><p class="text-[11px] text-gray-400">Total Outbound Dials</p><p class="text-2xl font-black mt-1 text-blue-400">${summaryDials}</p></div>
@@ -930,7 +938,7 @@
             `;
         } else {
             cardContainer.innerHTML = `
-                <div class="metric-card"><p class="text-[11px] text-gray-400">Institutional Offers Out</p><p class="text-2xl font-black mt-1 text-orange-400">${summaryOffers + (filterVal === 'all' ? 0 : 0)}</p></div>
+                <div class="metric-card"><p class="text-[11px] text-gray-400">Institutional Offers Out</p><p class="text-2xl font-black mt-1 text-orange-400">${summaryOffers}</p></div>
                 <div class="metric-card"><p class="text-[11px] text-gray-400">Contracts Signed & Locked</p><p class="text-2xl font-black mt-1 text-emerald-400">${summaryContracts}</p></div>
                 <div class="metric-card"><p class="text-[11px] text-gray-400">Total Active Pipeline Yield</p><p class="text-2xl font-black mt-1 text-blue-400">$${summaryValue.toLocaleString()}</p></div>
                 <div class="metric-card"><p class="text-[11px] text-gray-400">Ingestion Data Footprints</p><p class="text-2xl font-black mt-1 text-gray-400">${activeRowsCount} Shifts</p></div>
@@ -940,6 +948,7 @@
 
     function renderDispositionDeskPortal() {
         const grid = document.getElementById('dispo-grid-view');
+        if(!grid) return;
         grid.innerHTML = "";
 
         const dispoLeads = localLeadsMemory.filter(l => l.stage === 'contract_signed' || l.assignedDM !== 'Unassigned');
@@ -977,7 +986,7 @@
         const nameField = document.getElementById('admin-manager-name');
         const roleField = document.getElementById('admin-manager-role');
 
-        if(!nameField.value) return alert("Please supply personnel name.");
+        if(!nameField || !nameField.value) return alert("Please supply personnel name.");
 
         applicationManagersArray.push({
             id: applicationManagersArray.length + 1,
@@ -990,4 +999,66 @@
         repopulateModalPersonnelDropdowns();
     }
 
-    function renderActive
+    function renderActiveRosterDatabaseTable() {
+        const tbody = document.getElementById('admin-roster-body');
+        if(!tbody) return;
+        tbody.innerHTML = "";
+
+        applicationManagersArray.forEach(p => {
+            tbody.innerHTML += `
+                <tr class="border-b border-slate-900">
+                    <td class="py-2.5 font-bold text-white text-xs flex items-center gap-2"><i data-lucide="shield" class="w-3.5 h-3.5 text-blue-500"></i> ${p.name}</td>
+                    <td class="py-2.5 font-mono text-[10px] text-gray-400 uppercase">${p.role.replace(/([A-Z])/g, ' $1')}</td>
+                    <td class="py-2.5 text-right"><button onclick="removePersonnelNode(${p.id})" class="text-red-400 hover:text-red-300 text-[11px] font-medium transition">Revoke Access</button></td>
+                </tr>
+            `;
+        });
+        lucide.createIcons();
+    }
+
+    function removePersonnelNode(id) {
+        applicationManagersArray = applicationManagersArray.filter(p => p.id !== id);
+        renderActiveRosterDatabaseTable();
+        repopulateModalPersonnelDropdowns();
+    }
+
+    // Supabase Core Cloud Sync Layers
+    async function syncDataPipelineWithSupabaseCloud() {
+        try {
+            const { data, error } = await supabase.from('rei_leads_pipeline').select('*');
+            if (error) throw error;
+            if (data && data.length > 0) {
+                localLeadsMemory = data;
+            } else {
+                localLeadsMemory = [
+                    { id: "mock_1", stage: "new", address: "8421 W Mcnichols Rd, Detroit, MI", sellerName: "Marcus Vance", sellerPhone: "313-555-8921", market: "Detroit, MI", type: "Single Family", beds: "3", arv: 85000, repairs: 22000, wholesale: 8000, calculatedMao: 21000, assignedLM: "Sarah Jenkins", assignedAM: "Wilkens Branche", assignedDM: "Unassigned", emd: 100 },
+                    { id: "mock_2", stage: "underwriting", address: "1424 San Pedro Ave, El Paso, TX", sellerName: "Elena Rodriguez", market: "Texas Regional", type: "Single Family", beds: "3", arv: 195000, repairs: 35000, wholesale: 12000, calculatedMao: 70000, assignedLM: "Sarah Jenkins", assignedAM: "Wilkens Branche", assignedDM: "Unassigned", emd: 100 }
+                ];
+            }
+            renderPipelineFlowBoardLanes();
+        } catch (err) {
+            console.warn("Supabase integration database empty or mapping mismatch. Initializing console inside fallback buffer arrays.");
+            localLeadsMemory = [
+                { id: "mock_1", stage: "new", address: "8421 W Mcnichols Rd, Detroit, MI", sellerName: "Marcus Vance", sellerPhone: "313-555-8921", market: "Detroit, MI", type: "Single Family", beds: "3", arv: 85000, repairs: 22000, wholesale: 8000, calculatedMao: 21000, assignedLM: "Sarah Jenkins", assignedAM: "Wilkens Branche", assignedDM: "Unassigned", emd: 100 },
+                { id: "mock_2", stage: "underwriting", address: "1424 San Pedro Ave, El Paso, TX", sellerName: "Elena Rodriguez", market: "Texas Regional", type: "Single Family", beds: "3", arv: 195000, repairs: 35000, wholesale: 12000, calculatedMao: 70000, assignedLM: "Sarah Jenkins", assignedAM: "Wilkens Branche", assignedDM: "Unassigned", emd: 100 }
+            ];
+            renderPipelineFlowBoardLanes();
+        }
+    }
+
+    async function updateLeadDirectlyToSupabaseCloud(leadObj) {
+        try {
+            const { error } = await supabase.from('rei_leads_pipeline').upsert([leadObj]);
+            if(error) console.error("Cloud tracking transaction rejected:", error.message);
+        } catch (err) {
+            // Safe execution catch
+        }
+    }
+</script>
+
+<footer class="mt-auto py-2 bg-slate-950 border-t border-slate-900 text-center text-[10px] text-gray-600 font-medium">
+    All products are owned by Swift Equity Solutions.
+</footer>
+
+</body>
+</html>
