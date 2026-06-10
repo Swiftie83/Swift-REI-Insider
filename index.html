@@ -490,25 +490,35 @@
 
     // --- SWIFT REI AUTHENTICATION ENGINE ---
     
-    // 1. Handle Team Member Sign In via production auth nodes
     async function handleTeamLogin(email, password) {
-        if (!email || !password) {
-            alert("Please input both system email and password.");
-            return;
-        }
-        
+    console.log("Login button clicked");
+
+    if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+    }
+
+    try {
         const { data, error } = await supabase.auth.signInWithPassword({
             email: email,
-            password: password,
+            password: password
         });
 
+        console.log("Login Result:", data);
+        console.log("Login Error:", error);
+
         if (error) {
-            alert("Authentication Failed: " + error.message);
-        } else {
-            alert("Access Granted. Welcome back to the Console!");
-            processSuccessfulAuth(data.user.email);
+            alert(error.message);
+            return;
         }
+
+        processSuccessfulAuth(data.user.email);
+
+    } catch (err) {
+        console.error(err);
+        alert("System Error: " + err.message);
     }
+}
 
     // 2. Handle First-Time Password Creation (For Invited Managers)
     async function handleFirstTimePassword(email, password) {
