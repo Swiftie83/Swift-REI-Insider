@@ -485,8 +485,6 @@
             renderAdminRosterProfiles();
             toggleMetricInputs();
             runLiveUnderwritingCalculation();
-            document.getElementById("auth-screen").style.display = "none";
-            document.getElementById("user-display-email").innerText = "admin-hq@swiftequity.com";
             document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
         });
 
@@ -992,7 +990,7 @@ const supabase = window.supabase.createClient(
 );
 
 async function testConnection() {
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabase
         .from("leads")
         .select("*");
 
