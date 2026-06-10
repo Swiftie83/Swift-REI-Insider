@@ -786,7 +786,7 @@
         }
 
         // PROPERTY INTAKE PROCESSING SAFEGUARDS
-        function submitNewLead() {
+        async function submitNewLead() {
             const address = document.getElementById("lead-address").value.trim() || "Distressed Property Listing Asset";
             const sellerName = document.getElementById("lead-seller-name").value.trim() || "Unknown Seller";
             const sellerPhone = document.getElementById("lead-seller-phone").value.trim() || "N/A";
@@ -810,12 +810,30 @@
                 return;
             }
 
-            leads.push({
-                id: leads.length + 1,
-                address, sellerName, sellerPhone, sellerEmail, titleCompany: "", market, lm, am, dm: "Unassigned", tc: "Unassigned",
-                source, arv, repairs, wholesale, buffer: calcs.buffer, mao: calcs.mao, 
-                stage: 'new', propType, beds, dispoNotes: ""
-            });
+           await supabase
+.from("leads")
+.insert([{
+    address: address,
+    seller_name: sellerName,
+    seller_phone: sellerPhone,
+    seller_email: sellerEmail,
+    title_company: "",
+    market: market,
+    lm: lm,
+    am: am,
+    dm: "Unassigned",
+    tc: "Unassigned",
+    source: source,
+    arv: arv,
+    repairs: repairs,
+    wholesale: wholesale,
+    buffer: calcs.buffer,
+    mao: calcs.mao,
+    stage: "new",
+    prop_type: propType,
+    beds: beds,
+    dispo_notes: ""
+}]);
 
             closeModal('add-lead-modal');
             renderPipeline();
