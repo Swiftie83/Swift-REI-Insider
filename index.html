@@ -7,8 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
-  
-
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -27,16 +25,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- AUTH WALL --- */
-        #auth-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center;
-        }
-        .auth-box {
-            background: var(--bg-surface); padding: 2.5rem; border-radius: 0.75rem; 
-            border: 1px solid var(--border); width: 100%; max-width: 400px;
-        }
-
         /* --- SIDEBAR LAYOUT --- */
         aside { width: 260px; background-color: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; }
         .logo-area { display: flex; align-items: center; gap: 0.75rem; font-size: 1.25rem; font-weight: 700; color: #fff; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
@@ -45,7 +33,7 @@
         .nav-btn { width: 100%; display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--text-muted); background: none; border: none; border-radius: 0.5rem; cursor: pointer; text-align: left; font-size: 0.95rem; font-weight: 500; transition: all 0.2s; }
         .nav-btn:hover, .nav-btn.active { color: #fff; background-color: var(--bg-card); }
         .nav-btn.active { border-left: 4px solid var(--primary); }
-        .admin-only { display: none; border-left: 4px solid var(--accent) !important; }
+        .admin-only { border-left: 4px solid var(--accent) !important; }
         .sidebar-footer { font-size: 0.75rem; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border); padding-top: 1rem; }
 
         /* --- MAIN CORES --- */
@@ -61,8 +49,8 @@
         .stat-card { background-color: var(--bg-surface); padding: 1.25rem; border-radius: 0.75rem; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .stat-val { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
 
-        .pipeline-board { display: grid; grid-template-columns: repeat(5, minmax(270px, 1fr)); gap: 1rem; align-items: start; overflow-x: auto; padding-bottom: 1rem; }
-        .pipeline-col { background-color: var(--bg-surface); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border); min-height: 530px; }
+        .pipeline-board { display: flex; gap: 1rem; align-items: start; overflow-x: auto; padding-bottom: 1rem; }
+        .pipeline-col { background-color: var(--bg-surface); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border); min-height: 530px; min-width: 270px; flex: 1; }
         .col-header { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; display: flex; justify-content: space-between; }
         
         .deal-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
@@ -111,21 +99,6 @@
 </head>
 <body>
 
-    <div id="auth-screen">
-        <div class="auth-box">
-            <h2 style="font-size:1.4rem; text-align:center; margin-bottom:1rem;">Swift Equity Access System</h2>
-            <div class="form-group">
-                <label>Email ID</label>
-                <input type="email" id="auth-email" placeholder="admin@swiftequity.com">
-            </div>
-            <div class="form-group">
-                <label>System Password</label>
-                <input type="password" id="auth-password" placeholder="••••••••">
-            </div>
-            <button style="width:100%; background:var(--primary); color:#fff; padding:0.75rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer;" onclick="handleLogin()">Authenticate Securely</button>
-        </div>
-    </div>
-
     <aside>
         <div>
             <div class="logo-area">
@@ -148,9 +121,8 @@
             </nav>
         </div>
         <div class="sidebar-footer">
-            <div id="user-display-email" style="margin-bottom: 0.25rem; color:#fff; font-weight:500;"></div>
+            <div id="user-display-email" style="margin-bottom: 0.25rem; color:#fff; font-weight:500;">Wilkens B. Branche</div>
             <div style="margin-bottom: 0.75rem; color:var(--text-muted); font-size:0.8rem; word-break: break-all;">swiftequitysolutions@gmail.com</div>
-            <button onclick="handleLogout()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.8rem;">Disconnect Terminal</button>
         </div>
     </aside>
 
@@ -179,11 +151,11 @@
             </div>
             
             <div class="pipeline-board">
-                <div class="pipeline-col" id="col-new"><div class="col-header">New Lead <span class="count">0</span></div></div>
-                <div class="pipeline-col" id="col-underwriting"><div class="col-header">Underwriting <span class="count">0</span></div></div>
-                <div class="pipeline-col" id="col-offer"><div class="col-header">Offer Sent <span class="count">0</span></div></div>
-                <div class="pipeline-col" id="col-contract"><div class="col-header">Under Contract <span class="count">0</span></div></div>
-                <div class="pipeline-col" id="col-closed"><div class="col-header">Closed Transaction <span class="count">0</span></div></div>
+                <div class="pipeline-col" id="col-new"><div class="col-header">New Lead <span class="count" id="count-new">0</span></div><div class="cards-container"></div></div>
+                <div class="pipeline-col" id="col-underwriting"><div class="col-header">Underwriting <span class="count" id="count-underwriting">0</span></div><div class="cards-container"></div></div>
+                <div class="pipeline-col" id="col-offer"><div class="col-header">Offer Sent <span class="count" id="count-offer">0</span></div><div class="cards-container"></div></div>
+                <div class="pipeline-col" id="col-contract"><div class="col-header">Under Contract <span class="count" id="count-contract">0</span></div><div class="cards-container"></div></div>
+                <div class="pipeline-col" id="col-closed"><div class="col-header">Closed Transaction <span class="count" id="count-closed">0</span></div><div class="cards-container"></div></div>
             </div>
         </section>
 
@@ -333,7 +305,8 @@
                         <option value="50% Region">50% Nationwide Region (50% MAO)</option>
                         <option value="60% Region" selected>60% Nationwide Region (60% MAO)</option>
                         <option value="70% Region">70% Nationwide Region (70% MAO)</option>
-                        <option value="80% Region">80% Nationwide Region (80% MAO)</option>
+                        <option value="80% Region">80% Region (80% MAO)</option>
+                        <option value="85% Region">85% High-Comp Region (85% MAO)</option>
                     </select>
                 </div>
             </div>
@@ -382,7 +355,10 @@
                 <div id="live-mao-display" style="font-size: 1.4rem; font-weight: 700; color: var(--primary); margin-top: 0.25rem;">$0</div>
             </div>
 
-            <button style="background:var(--primary); color:#fff; width:100%; border:none; border-radius:0.5rem; padding:0.75rem; font-weight:600; cursor:pointer;" onclick="submitNewLead()">Route File to Lead Log Track</button>
+            <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                <button style="background:var(--accent); color:#fff; flex:1; border:none; border-radius:0.5rem; padding:0.75rem; font-weight:600; cursor:pointer;" onclick="triggerOfferGenerator('intake')"><i data-lucide="file-text" style="display:inline; vertical-align:middle; margin-right:4px; width:16px;"></i> Creative Offer Script</button>
+                <button style="background:var(--primary); color:#fff; flex:2; border:none; border-radius:0.5rem; padding:0.75rem; font-weight:600; cursor:pointer;" onclick="submitNewLead()">Route File to Lead Log Track</button>
+            </div>
         </div>
     </div>
 
@@ -410,7 +386,6 @@
                 <div><label>Calculated Target MAO</label> <strong id="modal-deal-mao" style="color:var(--warning); font-size:1.05rem;">-</strong></div>
             </div>
 
-            <!-- DYNAMIC REASSIGNMENT DESK MATRIX -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
                 <div class="form-group">
                     <label>Reassign Lead Manager (LM)</label>
@@ -436,19 +411,19 @@
             <div class="form-group" id="dispo-notes-panel" style="display:none; background:var(--bg-card); padding:1rem; border-radius:0.5rem; border:1px solid var(--accent); margin-bottom:1rem;">
                 <div class="form-group" style="margin-bottom: 1rem;">
                     <label style="color:#fff; font-weight:600;">Preferred Settlement Title Company Info</label>
-                    <input type="text" id="modal-dispo-title-co" placeholder="e.g. Liberty Title Co. (Contact: Closer Name / Phone)">
+                    <input type="text" id="modal-dispo-title-co" placeholder="Liberty Title Co.">
                 </div>
                 <label style="color:#fff; font-weight:600;">Log Dispo Blaster Notes</label>
                 <textarea id="modal-dispo-notes" rows="3" placeholder="Dispatched to cash buyers list via SMS..."></textarea>
             </div>
 
             <div style="display:flex; gap:0.5rem; justify-content:flex-end; border-top:1px solid var(--border); padding-top:1.25rem; flex-wrap: wrap;">
-                <button style="background:var(--danger); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500; margin-right: auto;" id="modal-btn-delete" onclick="deleteActiveLeadFile()"><i data-lucide="trash-2" style="display:inline; width:14px; vertical-align:middle; margin-right:3px;"></i> Delete Lead</button>
+                <button style="background:var(--danger); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500; margin-right: auto;" id="modal-btn-delete" onclick="deleteActiveLeadFile()"><i data-lucide="trash-2" style="display:inline; width:14px; vertical-align:middle; margin-right:3px;"></i> Delete</button>
                 <button style="background:#4b5563; color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" onclick="closeModal('deal-modal')">Cancel</button>
-                <button style="background:var(--danger); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="btn-move-back" onclick="adjustPipelineDirection(-1)"><i data-lucide="arrow-left" style="display:inline; width:14px; vertical-align:middle; margin-right:3px;"></i> Move Stage Back</button>
-                <button style="background:var(--primary); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="btn-move-forward" onclick="adjustPipelineDirection(1)">Advance Stage <i data-lucide="arrow-right" style="display:inline; width:14px; vertical-align:middle; margin-left:3px;"></i></button>
-                <button style="background:var(--accent); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="modal-btn-save" onclick="saveLeadManagerAssignments()">Save Sheet Changes</button>
-                <button style="background:var(--accent); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="modal-btn-email" onclick="generateOfferEmail()">Copy Offer Script</button>
+                <button style="background:var(--danger); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="btn-move-back" onclick="adjustPipelineDirection(-1)"><i data-lucide="arrow-left" style="display:inline; width:14px; vertical-align:middle; margin-right:3px;"></i> Back</button>
+                <button style="background:var(--primary); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="btn-move-forward" onclick="adjustPipelineDirection(1)">Advance <i data-lucide="arrow-right" style="display:inline; width:14px; vertical-align:middle; margin-left:3px;"></i></button>
+                <button style="background:var(--accent); color:#fff; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:500;" id="modal-btn-save" onclick="saveLeadManagerAssignments()">Save Changes</button>
+                <button style="background:var(--warning); color:#111; border:none; padding:0.65rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:600;" id="modal-btn-email" onclick="triggerOfferGenerator('existing')">Generate Offer Script</button>
             </div>
         </div>
     </div>
@@ -482,589 +457,517 @@
             }
         };
 
-        // Static Property Leads Tracking Base Data Arrays
+        // Standard Property Leads Array
         let leads = [
-            { id: 1, address: "1428 Elm St, Detroit MI", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "", market: "60% Region", lm: "Sarah Jenkins", am: "David Ross", dm: "Unassigned", tc: "Unassigned", source: "Pre-Foreclosure", arv: 140000, repairs: 25000, wholesale: 12500, buffer: 17500, mao: 29000, stage: "new", propType: "Single Family", beds: "3", dispoNotes: "" },
-            { id: 2, address: "992 Texas Ave, Houston TX", sellerName: "Maria Gonzales", sellerPhone: "(713) 555-8831", sellerEmail: "mgonz81@yahoo.com", titleCompany: "Lone Star Escrow Services", market: "60% Region", lm: "Marcus Vance", am: "Elena Rostova", dm: "Chris Gable", tc: "Tanya Cross", source: "Tax Lien", arv: 220000, repairs: 30000, wholesale: 15000, buffer: 27500, mao: 60000, stage: "closed", propType: "Single Family", beds: "3", dispoNotes: "" },
-            { id: 3, address: "4412 Citrus Dr, Tampa FL", sellerName: "Arthur Pendelton", sellerPhone: "(813) 555-4402", sellerEmail: "artiep@outlook.com", titleCompany: "Suncoast Title Partners", market: "70% Region", lm: "Sarah Jenkins", am: "David Ross", dm: "Chris Gable", tc: "Kristi Vance", source: "Tired Landlord", arv: 310000, repairs: 45000, wholesale: 22000, buffer: 38750, mao: 111250, stage: "contract", propType: "Multi-Family", beds: "4+", dispoNotes: "Blasted out to clear tier-1 cash list buyers. Execution pending inspection walk." }
+            { id: 1, address: "1428 Elm St, Detroit MI", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "Liberty Title Co.", market: "60% Region", stage: "new", source: "Tired Landlord", type: "Single Family", beds: "3", lm: "Sarah Jenkins", am: "David Ross", dm: "Chris Gable", tc: "Tanya Cross", arv: 140000, repairs: 25000, wholesale: 15000, buffer: 17500, mao: 46500, notes: "Needs full cosmetic updates." },
+            { id: 2, address: "904 West Ave, Austin TX", sellerName: "Claire Miller", sellerPhone: "(512) 555-8831", sellerEmail: "claire.m@outlook.com", titleCompany: "", market: "70% Region", stage: "underwriting", source: "Pre-Foreclosure", type: "Single Family", beds: "4+", lm: "Marcus Vance", am: "Elena Rostova", dm: "", tc: "", arv: 420000, repairs: 45000, wholesale: 25000, buffer: 52500, mao: 171500, notes: "" }
         ];
 
-        const pipelineOrder = ['new', 'underwriting', 'offer', 'contract', 'closed'];
-        let activeSelectedLeadId = null;
+        let selectedLeadId = null;
 
-        document.addEventListener("DOMContentLoaded", () => {
-            lucide.createIcons();
-            rebuildAllFormSelectorDropdowns();
-            renderPipeline();
-            renderPerformanceMetricsTables();
-            renderDispoDeskView();
-            renderAdminRosterProfiles();
-            toggleMetricInputs();
-            runLiveUnderwritingCalculation();
-            document.getElementById("auth-screen").style.display = "none";
-            document.getElementById("user-display-email").innerText = "admin-hq@swiftequity.com";
-            document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
+        // On Window Load initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
         });
 
-        // LIVE NATIONWIDE INSTITUTIONAL UNDERWRITING ENGINE
-        function runLiveUnderwritingCalculation() {
-            const arv = parseInt(document.getElementById("lead-arv").value) || 0;
-            const repairs = parseInt(document.getElementById("lead-repairs").value) || 0;
-            const wholesale = parseInt(document.getElementById("lead-wholesale").value) || 0;
-            const market = document.getElementById("lead-market").value;
-            
-            const buffer = Math.round(arv * 0.125);
-            document.getElementById("lead-buffer").value = buffer;
-
-            // Extract percentage directly out of the string (50%, 60%, 70%, 80%)
-            let marketPercentage = 0.60; 
-            if (market.includes("50%")) marketPercentage = 0.50;
-            else if (market.includes("60%")) marketPercentage = 0.60;
-            else if (market.includes("70%")) marketPercentage = 0.70;
-            else if (market.includes("80%")) marketPercentage = 0.80;
-
-            const mao = Math.round((arv * marketPercentage) - repairs - wholesale - buffer);
-            
-            const displayEl = document.getElementById("live-mao-display");
-            displayEl.innerText = mao > 0 ? `$${mao.toLocaleString()}` : "$0";
-            return { mao, buffer };
+        function initApp() {
+            lucide.createIcons();
+            populateDropdowns();
+            renderPipeline();
+            renderMatrices();
+            renderDispoDesk();
+            renderAdminRoster();
+            runLiveUnderwritingCalculation();
         }
 
-        // REBUILD FORM DROP CHANNELS
-        function rebuildAllFormSelectorDropdowns() {
-            const forms = [
-                { id: "lead-lm-select", key: "leadManager" },
-                { id: "lead-am-select", key: "acqManager" },
-                { id: "modal-assign-lm", key: "leadManager" },
-                { id: "modal-assign-am", key: "acqManager" },
-                { id: "modal-assign-dm", key: "dispoManager" },
-                { id: "modal-assign-tc", key: "transCoordinator" }
-            ];
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             
-            forms.forEach(f => {
-                const select = document.getElementById(f.id);
-                if(select) {
-                    select.innerHTML = f.id.startsWith("modal-") ? `<option value="Unassigned">Leave Unassigned</option>` : "";
-                    managementRoster[f.key].forEach(person => {
-                        select.innerHTML += `<option value="${person}">${person}</option>`;
-                    });
-                }
-            });
-            
-            populateMetricTargetManagers();
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            const clickedBtn = document.getElementById(`btn-nav-${viewName}`) || event.currentTarget;
+            if(clickedBtn) clickedBtn.classList.add('active');
+
+            if(viewName === 'pipeline') renderPipeline();
+            if(viewName === 'matrix') renderMatrices();
+            if(viewName === 'dispo') renderDispoDesk();
+            if(viewName === 'admin') renderAdminRoster();
         }
 
-        function populateMetricTargetManagers() {
-            const roleKey = document.getElementById("metric-role-select").value;
-            const targetSelect = document.getElementById("metric-manager-name");
-            if (!targetSelect) return;
-            targetSelect.innerHTML = "";
-            managementRoster[roleKey].forEach(name => {
-                targetSelect.innerHTML += `<option value="${name}">${name}</option>`;
-            });
-        }
-
-        function toggleMetricInputs() {
-            const role = document.getElementById("metric-role-select").value;
-            const labels = {
-                leadManager: ["Inbound Phone Calls", "Outbound Contacts Sourced", "Leads Qualified"],
-                acqManager: ["Offers Dispatched", "Follow-ups Completed", "Contracts Secured Under Hook"],
-                dispoManager: ["Cash Buyer List Blasts", "Walkthroughs Scheduled", "Deals Fully Assigned"],
-                transCoordinator: ["EMD Escrow Audits", "Title Clearance Audits", "Closings Realized"]
-            };
-            
-            document.getElementById("lbl-field-1").innerText = labels[role][0];
-            document.getElementById("lbl-field-2").innerText = labels[role][1];
-            document.getElementById("lbl-field-3").innerText = labels[role][2];
-            document.getElementById("field-box-3").style.display = "block"; 
-            
-            populateMetricTargetManagers();
-        }
-
-        function addNewManagerToDatabase() {
-            const name = document.getElementById("admin-manager-name").value.trim();
-            const role = document.getElementById("admin-manager-role").value;
-            if(!name) { alert("Please supply a valid personnel identity name string."); return; }
-            
-            if(!managementRoster[role].includes(name)) {
-                managementRoster[role].push(name);
-                metricLedgerData[role][name] = { f1: 0, f2: 0, f3: 0 };
-                rebuildAllFormSelectorDropdowns();
-                renderPerformanceMetricsTables();
-                renderAdminRosterProfiles();
-                document.getElementById("admin-manager-name").value = "";
-                alert(`Personnel Profile recorded: "${name}" assigned inside ${role} tracking channels.`);
-            }
-        }
-
-        // DELETION ENGINE: ERASE SPECIFIC OPERATORS
-        function removeManagerFromDatabase(role, name) {
-            const confirmation = confirm(`Are you sure you want to completely remove "${name}" from the ${role} roster?\nThis will clear them from option drop-downs across the desk.`);
-            if (confirmation) {
-                // Pull out from roster
-                managementRoster[role] = managementRoster[role].filter(n => n !== name);
-                // Purge metrics tracking desk
-                if (metricLedgerData[role] && metricLedgerData[role][name]) {
-                    delete metricLedgerData[role][name];
-                }
-                
-                rebuildAllFormSelectorDropdowns();
-                renderPerformanceMetricsTables();
-                renderAdminRosterProfiles();
-                alert(`"${name}" successfully stripped from active configurations.`);
-            }
-        }
-
-        function renderAdminRosterProfiles() {
-            const container = document.getElementById("admin-roster-display");
-            if (!container) return;
-            container.innerHTML = "";
-
-            const roleLabels = {
-                leadManager: "Lead Managers (LM)",
-                acqManager: "Acquisitions (AM)",
-                dispoManager: "Dispositions (DM)",
-                transCoordinator: "Transaction (TC)"
+        // --- PIPELINE ENGINE ---
+        function renderPipeline() {
+            const containers = {
+                new: document.querySelector('#col-new .cards-container'),
+                underwriting: document.querySelector('#col-underwriting .cards-container'),
+                offer: document.querySelector('#col-offer .cards-container'),
+                contract: document.querySelector('#col-contract .cards-container'),
+                closed: document.querySelector('#col-closed .cards-container')
             };
 
-            Object.keys(managementRoster).forEach(roleKey => {
-                let card = document.createElement("div");
-                card.className = "roster-card";
-                card.innerHTML = `<h4 style="color:var(--accent); font-size:0.9rem; margin-bottom:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.25rem;">${roleLabels[roleKey]}</h4>`;
-                
-                let listContainer = document.createElement("div");
-                
-                if (managementRoster[roleKey].length === 0) {
-                    listContainer.innerHTML = `<div style="color:var(--text-muted); font-size:0.8rem; padding: 0.25rem 0;">No active personnel</div>`;
-                } else {
-                    managementRoster[roleKey].forEach(name => {
-                        listContainer.innerHTML += `
-                            <div class="roster-list-item">
-                                <span style="font-size:0.9rem; font-weight:500;">${name}</span>
-                                <button class="btn-delete-operator" onclick="removeManagerFromDatabase('${roleKey}', '${name}')">
-                                    <i data-lucide="user-x" style="width:14px; height:14px;"></i> Clear
-                                </button>
-                            </div>
-                        `;
-                    });
+            // Clear previous UI entries
+            Object.values(containers).forEach(c => { if(c) c.innerHTML = ''; });
+
+            let counts = { new: 0, underwriting: 0, offer: 0, contract: 0, closed: 0 };
+            let totalVolume = 0;
+
+            leads.forEach(lead => {
+                counts[lead.stage]++;
+                if (lead.stage === 'closed') {
+                    totalVolume += Number(lead.wholesale || 0);
                 }
-                card.appendChild(listContainer);
-                container.appendChild(card);
+
+                const card = document.createElement('div');
+                card.className = 'deal-card';
+                card.onclick = () => openLeadProfile(lead.id);
+                card.innerHTML = `
+                    <div class="deal-title">${lead.address}</div>
+                    <div class="badge-row">
+                        <span class="deal-tag tag-market">${lead.market}</span>
+                        <span class="deal-tag tag-source">${lead.source}</span>
+                    </div>
+                    <div class="deal-meta">
+                        <span>Fee: <b style="color:var(--primary)">$${Number(lead.wholesale).toLocaleString()}</b></span>
+                        <span>MAO: <b style="color:var(--warning)">$${Number(lead.mao).toLocaleString()}</b></span>
+                    </div>
+                `;
+                if(containers[lead.stage]) containers[lead.stage].appendChild(card);
+            });
+
+            // Update Metrics Display Counters
+            document.getElementById('stat-active').innerText = leads.length;
+            document.getElementById('stat-volume').innerText = '$' + totalVolume.toLocaleString();
+            
+            Object.keys(counts).forEach(key => {
+                const el = document.getElementById(`count-${key}`);
+                if(el) el.innerText = counts[key];
             });
             lucide.createIcons();
         }
 
-        function submitRoleActivityMetrics() {
-            const role = document.getElementById("metric-role-select").value;
-            const name = document.getElementById("metric-manager-name").value;
-            const f1 = parseInt(document.getElementById("val-field-1").value) || 0;
-            const f2 = parseInt(document.getElementById("val-field-2").value) || 0;
-            const f3 = parseInt(document.getElementById("val-field-3").value) || 0;
+        // --- UNDERWRITING FORMULA CALCULATION ---
+        function runLiveUnderwritingCalculation() {
+            const arv = Number(document.getElementById('lead-arv').value) || 0;
+            const repairs = Number(document.getElementById('lead-repairs').value) || 0;
+            const wholesale = Number(document.getElementById('lead-wholesale').value) || 0;
+            const marketSelector = document.getElementById('lead-market').value;
 
-            if(!name) return;
-            if(!metricLedgerData[role][name]) { metricLedgerData[role][name] = { f1: 0, f2: 0, f3: 0 }; }
+            // Handle 2-Bedroom Rule Check Safeguard 
+            const bedCount = document.getElementById('lead-beds').value;
+            const propType = document.getElementById('lead-prop-type').value;
+            if(bedCount === "2" && propType === "Single Family") {
+                document.getElementById('live-mao-display').innerText = "KILL DEAL (2-Bed Single Family)";
+                document.getElementById('live-mao-display').style.color = "var(--danger)";
+                return;
+            } else {
+                document.getElementById('live-mao-display').style.color = "var(--primary)";
+            }
 
-            metricLedgerData[role][name].f1 += f1;
-            metricLedgerData[role][name].f2 += f2;
-            metricLedgerData[role][name].f3 += f3;
+            // Extract numeric modifier percentages
+            let percentage = 0.60;
+            if(marketSelector.includes("50%")) percentage = 0.50;
+            if(marketSelector.includes("70%")) percentage = 0.70;
+            if(marketSelector.includes("80%")) percentage = 0.80;
+            if(marketSelector.includes("85%")) percentage = 0.85;
 
-            renderPerformanceMetricsTables();
-            document.getElementById("val-field-1").value = "0";
-            document.getElementById("val-field-2").value = "0";
-            document.getElementById("val-field-3").value = "0";
-            alert("Statistical records aggregated into live operations ledger.");
+            // Standard Buyer Margin Buffer at constant 12.5%
+            const buffer = Math.round(arv * 0.125);
+            document.getElementById('lead-buffer').value = buffer;
+
+            // Operational Core Real Estate Formula 
+            const mao = Math.round((arv * percentage) - repairs - wholesale - buffer);
+            document.getElementById('live-mao-display').innerText = mao > 0 ? '$' + mao.toLocaleString() : '$0';
         }
 
-        function renderPerformanceMetricsTables() {
-            const roles = ["leadManager", "acqManager", "dispoManager", "transCoordinator"];
-            roles.forEach(role => {
-                const tbody = document.getElementById(`tbl-${role}`);
-                if(!tbody) return;
-                tbody.innerHTML = "";
-                
-                Object.keys(metricLedgerData[role]).forEach(name => {
-                    const stats = metricLedgerData[role][name];
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${name}</strong></td>
-                            <td>${stats.f1.toLocaleString()} Logs</td>
-                            <td>${stats.f2.toLocaleString()} Units</td>
-                            <td style="color:var(--primary); font-weight:600;">${stats.f3.toLocaleString()} Realized</td>
-                        </tr>
-                    `;
-                });
-            });
+        // --- CREATIVE REIS OFFER GENERATOR SYSTEM BUTTON ---
+        function triggerOfferGenerator(type) {
+            let address, arv, repairs, wholesale, mao, seller;
+
+            if(type === 'intake') {
+                address = document.getElementById('lead-address').value || "[Property Address]";
+                arv = Number(document.getElementById('lead-arv').value) || 0;
+                repairs = Number(document.getElementById('lead-repairs').value) || 0;
+                wholesale = Number(document.getElementById('lead-wholesale').value) || 0;
+                seller = document.getElementById('lead-seller-name').value || "Property Owner";
+                const textMao = document.getElementById('live-mao-display').innerText;
+                mao = textMao.includes("KILL") ? 0 : Number(textMao.replace(/[^0-9.-]+/g,""));
+            } else {
+                const lead = leads.find(l => l.id === selectedLeadId);
+                if(!lead) return;
+                address = lead.address;
+                arv = lead.arv;
+                repairs = lead.repairs;
+                wholesale = lead.wholesale;
+                mao = lead.mao;
+                seller = lead.sellerName;
+            }
+
+            const principalMonthly = Math.round(mao / 120); // Computed example logic for principal-only 10yr schedule amortized spread
+
+            const emailDraft = `
+SUBJECT: Clean Purchase Offer - ${address}
+
+Dear ${seller},
+
+We appreciate the opportunity to submit our formal buying proposal for the property located at ${address}. 
+
+Based on our asset evaluation analytics, Swift Equity Solutions LLC is prepared to advance under the following strict execution parameters:
+
+1. Purchase Structure Options:
+   - Cash Purchase Term Option: Maximum Allowable Valuation Allocation of $${mao.toLocaleString()} Net to Seller.
+   - Installment Structure: Fixed Term Sheet providing structured Principal-Only payments of $${principalMonthly.toLocaleString()}/month across an agreed extended timeline.
+
+2. Settlement Guardrails:
+   - Contract Execution Instrument: We will utilize our own corporate purchasing contract agreements.
+   - Escrow Settlement: Closing coordinates will process through our preferred local title company.
+   - Timeline Duration Window: Closing completion is realized cleanly within 30 days of clear title discovery verification.
+
+Please review these criteria points and advise on your path to proceed.
+
+Best Regards,
+
+Wilkens B. Branche
+Swift Equity Solutions LLC
+swiftequitysolutions@gmail.com
+            `;
+
+            alert(`=========================================\nSWIFT REAL ESTATE CREATIVE FINANCING OUTLINE\n=========================================\n${emailDraft}\n\n[System Alert: Offer Script Copied to Clipboard Context!]`);
+            navigator.clipboard.writeText(emailDraft.trim());
         }
 
-        // PIPELINE BOARD ENGINE
-        function renderPipeline() {
-            pipelineOrder.forEach(stg => {
-                const el = document.getElementById(`col-${stg}`);
-                if(el) el.innerHTML = `<div class="col-header">${stg.toUpperCase()} <span class="count">0</span></div>`;
-            });
+        // --- CORE LEADS ACTIONS ---
+        function submitNewLead() {
+            const address = document.getElementById('lead-address').value;
+            if(!address) { alert('Street Address is mandatory.'); return; }
 
-            let closedRevenueWholesaleFeesTotals = 0;
-            let activeCount = 0;
-
-            leads.forEach(lead => {
-                if(lead.stage === 'closed') {
-                    closedRevenueWholesaleFeesTotals += lead.wholesale;
-                } else {
-                    activeCount++;
-                }
-
-                const columnEl = document.getElementById(`col-${lead.stage}`);
-                if(columnEl) {
-                    const card = document.createElement('div');
-                    card.className = 'deal-card';
-                    card.onclick = () => openDealModal(lead.id);
-                    card.innerHTML = `
-                        <div class="deal-title">${lead.address}</div>
-                        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 0.5rem;">Seller: ${lead.sellerName || 'N/A'}</div>
-                        <div class="badge-row">
-                            <span class="deal-tag tag-market">${lead.market}</span>
-                            <span class="deal-tag tag-role">LM: ${lead.lm}</span>
-                            <span class="deal-tag tag-source">${lead.source}</span>
-                        </div>
-                        <div class="deal-meta">
-                            <span>MAO: $${(lead.mao/1000).toFixed(1)}k</span>
-                            <span style="color:var(--primary); font-weight:600;">Wholesale: $${lead.wholesale.toLocaleString()}</span>
-                        </div>
-                    `;
-                    columnEl.appendChild(card);
-                }
-            });
-
-            pipelineOrder.forEach(stg => {
-                const colEl = document.getElementById(`col-${stg}`);
-                if(colEl) {
-                    const count = colEl.querySelectorAll('.deal-card').length;
-                    colEl.querySelector('.count').innerText = count;
-                }
-            });
-
-            document.getElementById('stat-active').innerText = activeCount;
-            document.getElementById('stat-volume').innerText = `$${closedRevenueWholesaleFeesTotals.toLocaleString()}`;
-        }
-
-        // DISPO DESK MATRIX VIEW ENGINE
-        function renderDispoDeskView() {
-            const container = document.getElementById("dispo-cards-container");
-            container.innerHTML = "";
-            const targets = leads.filter(l => l.stage === 'contract' || l.stage === 'closed');
-
-            if(targets.length === 0) {
-                container.innerHTML = `<div style="color:var(--text-muted); font-size:0.9rem;">No active inventory records routed to disposition tracks currently.</div>`;
+            const bedCount = document.getElementById('lead-beds').value;
+            const propType = document.getElementById('lead-prop-type').value;
+            if(bedCount === "2" && propType === "Single Family") {
+                alert('Deal Violates Institutional Standards Rule: 2 Bed Single Family is a hard system kill.');
                 return;
             }
 
-            targets.forEach(lead => {
-                container.innerHTML += `
-                    <div class="dispo-card">
-                        <h4 style="color:#fff; margin-bottom:0.5rem;">${lead.address}</h4>
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                            Seller: <strong>${lead.sellerName || 'N/A'}</strong> | ${lead.sellerPhone || 'N/A'}
-                        </div>
-                        <div class="badge-row">
-                            <span class="deal-tag tag-role">Dispo Lead: ${lead.dm}</span>
-                            <span class="deal-tag tag-market">${lead.propType} (${lead.beds} Beds)</span>
-                            <span class="deal-tag tag-source" style="background:var(--primary); color:#fff;">Fee: $${lead.wholesale.toLocaleString()}</span>
-                        </div>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0;">
-                            <strong>Settlement Title Escrow:</strong> <span style="color:var(--warning); font-weight:500;">${lead.titleCompany || 'Not Assigned Yet'}</span>
-                        </p>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0;">
-                            <strong>Dispo Desk Feed Logs:</strong><br>${lead.dispoNotes || "No wireless wire broadcasts captured yet."}
-                        </p>
-                        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:0.75rem; font-size:0.8rem;">
-                            <span>TC Control: <strong>${lead.tc}</strong></span>
-                            <button style="background:var(--bg-card); border:1px solid var(--border); color:#fff; padding:0.35rem 0.65rem; border-radius:0.25rem; cursor:pointer;" onclick="openDealModal(${lead.id})">Update File Matrix</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
+            const textMao = document.getElementById('live-mao-display').innerText;
+            const computedMao = Number(textMao.replace(/[^0-9.-]+/g,"")) || 0;
 
-        // PROPERTY INTAKE PROCESSING SAFEGUARDS
-        async function submitNewLead() {
-            const address = document.getElementById("lead-address").value.trim() || "Distressed Property Listing Asset";
-            const sellerName = document.getElementById("lead-seller-name").value.trim() || "Unknown Seller";
-            const sellerPhone = document.getElementById("lead-seller-phone").value.trim() || "N/A";
-            const sellerEmail = document.getElementById("lead-seller-email").value.trim() || "N/A";
+            const nextId = leads.length > 0 ? Math.max(...leads.map(l => l.id)) + 1 : 1;
             
-            const source = document.getElementById("lead-source").value;
-            const market = document.getElementById("lead-market").value;
-            const propType = document.getElementById("lead-prop-type").value;
-            const beds = document.getElementById("lead-beds").value;
-            const lm = document.getElementById("lead-lm-select").value;
-            const am = document.getElementById("lead-am-select").value;
-            
-            const arv = parseInt(document.getElementById("lead-arv").value) || 0;
-            const repairs = parseInt(document.getElementById("lead-repairs").value) || 0;
-            const wholesale = parseInt(document.getElementById("lead-wholesale").value) || 0;
-            
-            const calcs = runLiveUnderwritingCalculation();
+            const newFile = {
+                id: nextId,
+                address: address,
+                sellerName: document.getElementById('lead-seller-name').value || "-",
+                sellerPhone: document.getElementById('lead-seller-phone').value || "-",
+                sellerEmail: document.getElementById('lead-seller-email').value || "-",
+                titleCompany: "",
+                market: document.getElementById('lead-market').value,
+                stage: "new",
+                source: document.getElementById('lead-source').value,
+                type: propType,
+                beds: bedCount,
+                lm: document.getElementById('lead-lm-select').value,
+                am: document.getElementById('lead-am-select').value,
+                dm: "", tc: "",
+                arv: Number(document.getElementById('lead-arv').value) || 0,
+                repairs: Number(document.getElementById('lead-repairs').value) || 0,
+                wholesale: Number(document.getElementById('lead-wholesale').value) || 0,
+                buffer: Number(document.getElementById('lead-buffer').value) || 0,
+                mao: computedMao,
+                notes: ""
+            };
 
-            if(beds === "2" && propType === "Single Family") {
-                alert("CRITICAL HOUSING EXCLUSION:\n\n2-Bedroom Single Family properties do not align with company liquidity underwriting protocols. File rejected to protect cash positions.");
-                return;
-            }
-
-        const { data, error } = await supabase
-.from("rei_leads_pipeline")
-.insert([
-{
-    id: crypto.randomUUID(),
-    address: address,
-    sellerName: sellerName,
-    sellerPhone: sellerPhone,
-    sellerEmail: sellerEmail,
-    source: source,
-    market: market,
-    type: propType,
-    beds: beds,
-    arv: arv,
-    repairs: repairs,
-    wholesale: wholesale,
-    calculatedMao: calcs.mao,
-    assignedL: lm,
-    assignedAM: am,
-    assignedM: "Unassigned",
-    titleCompany: "",
-    dispoNotes: "",
-    emd: 100,
-    stage: "new"
-}
-])
-.select();
-
-
-if(error){
-    console.log("SAVE ERROR:", error);
-    alert("Error saving lead");
-}else{
-    console.log("SAVED TO SUPABASE:", data);
-    alert("Lead Saved");
-}
-            async function loadLeads(){
-
-const { data, error } = await supabase
-.from("rei_leads_pipeline")
-.select("*")
-.order("created_at", { ascending:false });
-
-
-if(error){
-console.log("LOAD ERROR:", error);
-return;
-}
-
-
-console.log("LOADED LEADS:", data);
-
-
-// Example if you have a table:
-data.forEach(lead => {
-
-console.log(lead.address);
-
-});
-
-}
-
-
-window.addEventListener("load", loadLeads);
-
+            leads.push(newFile);
             closeModal('add-lead-modal');
             renderPipeline();
             
-            // Wipe data inputs
-            document.getElementById("lead-address").value = "";
-            document.getElementById("lead-seller-name").value = "";
-            document.getElementById("lead-seller-phone").value = "";
-            document.getElementById("lead-seller-email").value = "";
-            
-            alert("Property tracking file instantiated and logged cleanly.");
+            // Clear Inputs Form Array
+            document.getElementById('lead-address').value = '';
+            document.getElementById('lead-seller-name').value = '';
+            document.getElementById('lead-seller-phone').value = '';
+            document.getElementById('lead-seller-email').value = '';
         }
 
-        // DESTRUCTION ENGINE: REMOVE LEAD FILE PERMANENTLY
-        function deleteActiveLeadFile() {
-            if (!activeSelectedLeadId) return;
-            
-            const lead = leads.find(l => l.id === activeSelectedLeadId);
-            if (!lead) return;
-
-            const confirmation = confirm(`CRITICAL ACTION MANDATE:\n\nAre you sure you want to completely purge the tracking file for:\n"${lead.address}"?\n\nThis deletion cannot be undone.`);
-            
-            if (confirmation) {
-                leads = leads.filter(l => l.id !== activeSelectedLeadId);
-                closeModal('deal-modal');
-                renderPipeline();
-                renderDispoDeskView();
-                activeSelectedLeadId = null;
-                alert("Lead tracking file successfully scrubbed from terminal records.");
-            }
-        }
-
-        // WORKFLOW DETAILED MODAL MANAGEMENT
-        function openDealModal(id) {
+        function openLeadProfile(id) {
+            selectedLeadId = id;
             const lead = leads.find(l => l.id === id);
             if(!lead) return;
-            activeSelectedLeadId = id;
 
-            document.getElementById("modal-deal-title").innerText = lead.address;
-            document.getElementById("modal-seller-name").innerText = lead.sellerName || "N/A";
-            document.getElementById("modal-seller-phone").innerText = lead.sellerPhone || "N/A";
-            document.getElementById("modal-seller-email").innerText = lead.sellerEmail || "N/A";
-            
-            document.getElementById("modal-deal-stage").innerText = lead.stage;
-            document.getElementById("modal-deal-source").innerText = lead.source;
-            document.getElementById("modal-deal-wholesale").innerText = `$${lead.wholesale.toLocaleString()}`;
-            document.getElementById("modal-deal-mao").innerText = lead.mao > 0 ? `$${lead.mao.toLocaleString()}` : "$0";
+            document.getElementById('modal-deal-title').innerText = lead.address;
+            document.getElementById('modal-seller-name').innerText = lead.sellerName;
+            document.getElementById('modal-seller-phone').innerText = lead.sellerPhone;
+            document.getElementById('modal-seller-email').innerText = lead.sellerEmail;
+            document.getElementById('modal-deal-stage').innerText = lead.stage;
+            document.getElementById('modal-deal-source').innerText = lead.source;
+            document.getElementById('modal-deal-wholesale').innerText = '$' + lead.wholesale.toLocaleString();
+            document.getElementById('modal-deal-mao').innerText = '$' + lead.mao.toLocaleString();
 
-            document.getElementById("modal-assign-lm").value = lead.lm;
-            document.getElementById("modal-assign-am").value = lead.am;
-            document.getElementById("modal-assign-dm").value = lead.dm;
-            document.getElementById("modal-assign-tc").value = lead.tc;
-
-            const dispoPanel = document.getElementById("dispo-notes-panel");
-            const assignBox = document.getElementById("modal-dispo-tc-assign-box");
-            
-            if(lead.stage === 'contract' || lead.stage === 'closed') {
-                dispoPanel.style.display = "block";
-                assignBox.style.display = "grid";
-                document.getElementById("modal-dispo-notes").value = lead.dispoNotes;
-                document.getElementById("modal-dispo-title-co").value = lead.titleCompany || "";
-            } else {
-                dispoPanel.style.display = "none";
-                assignBox.style.display = "none";
-            }
-
-            document.getElementById("btn-move-back").style.visibility = (lead.stage === 'new') ? "hidden" : "visible";
-            document.getElementById("btn-move-forward").style.visibility = (lead.stage === 'closed') ? "hidden" : "visible";
-
-            const container = document.getElementById("modal-badge-container");
-            container.innerHTML = `
+            const badges = document.getElementById('modal-badge-container');
+            badges.innerHTML = `
                 <span class="deal-tag tag-market">${lead.market}</span>
-                <span class="deal-tag tag-source">Origin: ${lead.source}</span>
-                <span class="deal-tag tag-role">${lead.propType} (${lead.beds} Br)</span>
+                <span class="deal-tag tag-role">${lead.type} (${lead.beds} Bed)</span>
             `;
+
+            // Populate mapping drops selections elements
+            populateModalDropdowns(lead);
+
+            // Conditional layout options handling display elements
+            const dispoPanel = document.getElementById('modal-dispo-tc-assign-box');
+            const dispoNotes = document.getElementById('dispo-notes-panel');
+            
+            if(['contract', 'closed'].includes(lead.stage)) {
+                dispoPanel.style.display = 'grid';
+                dispoNotes.style.display = 'block';
+                document.getElementById('modal-dispo-title-co').value = lead.titleCompany || "";
+                document.getElementById('modal-dispo-notes').value = lead.notes || "";
+            } else {
+                dispoPanel.style.display = 'none';
+                dispoNotes.style.display = 'none';
+            }
 
             openModal('deal-modal');
         }
 
-        // SAVE INTERMEDIATE MODAL STATE ASSIGNMENTS
         function saveLeadManagerAssignments() {
-            const lead = leads.find(l => l.id === activeSelectedLeadId);
+            const lead = leads.find(l => l.id === selectedLeadId);
             if(!lead) return;
 
-            lead.lm = document.getElementById("modal-assign-lm").value;
-            lead.am = document.getElementById("modal-assign-am").value;
+            lead.lm = document.getElementById('modal-assign-lm').value;
+            lead.am = document.getElementById('modal-assign-am').value;
             
-            if(lead.stage === 'contract' || lead.stage === 'closed') {
-                lead.dispoNotes = document.getElementById("modal-dispo-notes").value;
-                lead.titleCompany = document.getElementById("modal-dispo-title-co").value.trim();
-                lead.dm = document.getElementById("modal-assign-dm").value;
-                lead.tc = document.getElementById("modal-assign-tc").value;
+            if(['contract', 'closed'].includes(lead.stage)) {
+                lead.dm = document.getElementById('modal-assign-dm').value;
+                lead.tc = document.getElementById('modal-assign-tc').value;
+                lead.titleCompany = document.getElementById('modal-dispo-title-co').value;
+                lead.notes = document.getElementById('modal-dispo-notes').value;
             }
 
-            alert("Manager assignment parameters written cleanly to data arrays.");
             closeModal('deal-modal');
             renderPipeline();
-            renderDispoDeskView();
         }
 
-        // BI-DIRECTIONAL PIPELINE TRAFFIC ROUTING ENGINE
-        function adjustPipelineDirection(directionModifier) {
-            const lead = leads.find(l => l.id === activeSelectedLeadId);
+        function adjustPipelineDirection(dir) {
+            const tracks = ["new", "underwriting", "offer", "contract", "closed"];
+            const lead = leads.find(l => l.id === selectedLeadId);
             if(!lead) return;
 
-            const currentIndex = pipelineOrder.indexOf(lead.stage);
-            const targetIndex = currentIndex + directionModifier;
+            let currentIndex = tracks.indexOf(lead.stage);
+            let nextIndex = currentIndex + dir;
 
-            if(targetIndex >= 0 && targetIndex < pipelineOrder.length) {
-                // Ensure dynamic changes are saved when advancing or moving back stages
-                lead.lm = document.getElementById("modal-assign-lm").value;
-                lead.am = document.getElementById("modal-assign-am").value;
-
-                if(lead.stage === 'contract' || lead.stage === 'closed') {
-                    lead.dispoNotes = document.getElementById("modal-dispo-notes").value;
-                    lead.titleCompany = document.getElementById("modal-dispo-title-co").value.trim();
-                    lead.dm = document.getElementById("modal-assign-dm").value;
-                    lead.tc = document.getElementById("modal-assign-tc").value;
+            if(nextIndex >= 0 && nextIndex < tracks.length) {
+                lead.stage = tracks[nextIndex];
+                
+                // Prefill corporate defaults rules logic mapping elements
+                if(lead.stage === 'contract' && !lead.titleCompany) {
+                    lead.titleCompany = "Liberty Title Co.";
                 }
-
-                lead.stage = pipelineOrder[targetIndex];
-                alert(`Deal file status successfully adjusted to stage: ${lead.stage.toUpperCase()}`);
-                closeModal('deal-modal');
+                
+                openLeadProfile(lead.id);
                 renderPipeline();
-                renderDispoDeskView();
             }
         }
 
-        // PROP OFFER GENERATION STRING INTERPOLATOR
-        function generateOfferEmail() {
-            const lead = leads.find(l => l.id === activeSelectedLeadId);
-            if(!lead) return;
+        function deleteActiveLeadFile() {
+            if(confirm("Confirm deletion of this property lead file from system active index registry?")) {
+                leads = leads.filter(l => l.id !== selectedLeadId);
+                closeModal('deal-modal');
+                renderPipeline();
+            }
+        }
 
-            const targetPurchasePrice = lead.mao > 0 ? lead.mao : Math.round(lead.arv * 0.6);
-            const monthlyPayment = Math.round(targetPurchasePrice / 360);
+        // --- MANAGEMENT MATRICES DESK Engine ---
+        function renderMatrices() {
+            const roles = ['leadManager', 'acqManager', 'dispoManager', 'transCoordinator'];
+            roles.forEach(role => {
+                const tbody = document.getElementById(`tbl-${role}`);
+                if(!tbody) return;
+                tbody.innerHTML = '';
 
-            const emailTemplate = `Subject: Formal Offer Submission - ${lead.address}
-
-To Whom It May Concern,
-
-We are pleased to submit our formal purchasing offer framework for the asset located at ${lead.address}.
-
-We propose the following customized structures for your review:
-
-Option A: Creative Financing Alignment
-- Purchase Price Strategy: $${targetPurchasePrice.toLocaleString()}
-- Financing Terms: Structured via Principal-Only payments
-- Installment Plan: $${monthlyPayment}/month sustained over a standard amortization schedule.
-
-Transaction Specifications:
-Please note that for all confirmed acquisitions, we will utilize our own proprietary clear-title verified contract documentation alongside our preferred transaction closing title company. Our internal standard operational protocol mandates a secure closing timeline realized within 30 days of mutual execution.
-
-We look forward to collaborating on a successful settlement.
-
-Best Regards,
-Acquisitions Team
-Swift Equity Solutions LLC`;
-
-            navigator.clipboard.writeText(emailTemplate).then(() => {
-                alert("Offer scripts copied to operational clipboard successfully.");
+                const profiles = managementRoster[role];
+                profiles.forEach(name => {
+                    const stats = metricLedgerData[role][name] || { f1: 0, f2: 0, f3: 0 };
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight:600; color:#fff;">${name}</td>
+                        <td>${stats.f1}</td>
+                        <td>${stats.f2}</td>
+                        <td>${stats.f3}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
             });
         }
 
-        function switchView(viewId) {
-            document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
-            document.querySelectorAll('.nav-links .nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`view-${viewId}`).classList.add('active');
-            document.getElementById(`btn-nav-${viewId}`).classList.add('active');
+        function toggleMetricInputs() {
+            const role = document.getElementById('metric-role-select').value;
+            const labels = {
+                leadManager: ["Inbound Calls Connect", "Outbound Leads Sourced", "Leads Qualified Matrix"],
+                acqManager: ["Offers Dispatched", "Follow-ups Completed", "Contracts Secured"],
+                dispoManager: ["Cash Buyer Blasts", "Walkthroughs Scheduled", "Deals Assigned"],
+                transCoordinator: ["EMD Verifications", "Title Clearances Audit", "Closings Realized"]
+            };
+
+            document.getElementById('lbl-field-1').innerText = labels[role][0];
+            document.getElementById('lbl-field-2').innerText = labels[role][1];
+            document.getElementById('lbl-field-3').innerText = labels[role][2];
+            document.getElementById('field-box-3').style.display = 'block';
+
+            // Populate the target names dropdown
+            const nameSelect = document.getElementById('metric-manager-name');
+            nameSelect.innerHTML = '';
+            managementRoster[role].forEach(n => {
+                nameSelect.innerHTML += `<option value="${n}">${n}</option>`;
+            });
         }
 
-        function openModal(modalId) { document.getElementById(modalId).classList.add("active"); }
-        function closeModal(modalId) { document.getElementById(modalId).classList.remove("active"); }
-        function handleLogin() { document.getElementById("auth-screen").style.display = "none"; }
-        function handleLogout() { document.getElementById("auth-screen").style.display = "flex"; }
+        function submitRoleActivityMetrics() {
+            const role = document.getElementById('metric-role-select').value;
+            const name = document.getElementById('metric-manager-name').value;
+            
+            if(!name) return;
+
+            metricLedgerData[role][name] = {
+                f1: Number(document.getElementById('val-field-1').value) || 0,
+                f2: Number(document.getElementById('val-field-2').value) || 0,
+                f3: Number(document.getElementById('val-field-3').value) || 0
+            };
+
+            renderMatrices();
+            alert(`Operational telemetry matrix tracking successfully saved for ${name}`);
+        }
+
+        // --- DISPOSITION DESK UI VIEW ---
+        function renderDispoDesk() {
+            const container = document.getElementById('dispo-cards-container');
+            container.innerHTML = '';
+
+            const dispoInventory = leads.filter(l => ['contract', 'closed'].includes(l.stage));
+
+            if(dispoInventory.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted);">No active inventory currently logged under contract tracking stage tier structures.</p>`;
+                return;
+            }
+
+            dispoInventory.forEach(deal => {
+                const card = document.createElement('div');
+                card.className = 'dispo-card';
+                card.innerHTML = `
+                    <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">${deal.address}</h3>
+                    <div style="font-size:0.85rem; margin-bottom:0.75rem; color:var(--text-muted);">
+                        Assigned DM: <strong style="color:#fff;">${deal.dm || "Unassigned"}</strong> | TC: <strong style="color:#fff;">${deal.tc || "Unassigned"}</strong>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.2); padding:0.75rem; border-radius:0.4rem; font-size:0.85rem; margin-bottom:1rem; border:1px solid var(--border);">
+                        <div style="margin-bottom:0.25rem;"><span style="color:var(--text-muted)">Preferred Settlement Title:</span> <br><strong>${deal.titleCompany || "Swift Contract Target Default"}</strong></div>
+                        <div><span style="color:var(--text-muted)">Latest Dispo Dispatch Log Updates:</span><br> <span style="font-style:italic;">${deal.notes || "No dispo blast notes logged yet."}</span></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Expected Net Wholesale Assignment Revenue Profit Target Margin:</span>
+                        <strong style="color:var(--primary); font-size:1.1rem;">$${deal.wholesale.toLocaleString()}</strong>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- SYSTEM ADMIN CONFIGS ---
+        function renderAdminRoster() {
+            const container = document.getElementById('admin-roster-display');
+            container.innerHTML = '';
+
+            const roles = {
+                leadManager: "Lead Manager (LM)",
+                acqManager: "Acquisitions Manager (AM)",
+                dispoManager: "Disposition Manager (DM)",
+                transCoordinator: "Transaction Coordinator (TC)"
+            };
+
+            Object.keys(managementRoster).forEach(roleKey => {
+                const card = document.createElement('div');
+                card.className = 'roster-card';
+                card.innerHTML = `<h3>${roles[roleKey]}</h3><div class="roster-list-box" id="roster-box-${roleKey}"></div>`;
+                container.appendChild(card);
+
+                const listBox = document.getElementById(`roster-box-${roleKey}`);
+                managementRoster[roleKey].forEach(name => {
+                    const item = document.createElement('div');
+                    item.className = 'roster-list-item';
+                    item.innerHTML = `
+                        <span style="font-size:0.9rem; color:#fff;">${name}</span>
+                        <button class="btn-delete-operator" onclick="purgeSystemOperator('${roleKey}', '${name}')"><i data-lucide="user-x" style="width:14px;"></i> Remove</button>
+                    `;
+                    listBox.appendChild(item);
+                });
+            });
+            lucide.createIcons();
+        }
+
+        function addNewManagerToDatabase() {
+            const name = document.getElementById('admin-manager-name').value.trim();
+            const role = document.getElementById('admin-manager-role').value;
+
+            if(!name) { alert("Personnel Name criteria input missing."); return; }
+
+            if(!managementRoster[role].includes(name)) {
+                managementRoster[role].push(name);
+                if(!metricLedgerData[role][name]) {
+                    metricLedgerData[role][name] = { f1: 0, f2: 0, f3: 0 };
+                }
+                document.getElementById('admin-manager-name').value = '';
+                renderAdminRoster();
+                populateDropdowns();
+                alert(`Corporate Operator profile created: Written profile mapping for ${name} inside database index entries.`);
+            } else {
+                alert("Operator entity profile registration collision detected: Name identity exists.");
+            }
+        }
+
+        function purgeSystemOperator(role, name) {
+            if(confirm(`Confirm operational purging of agent profile: ${name}?`)) {
+                managementRoster[role] = managementRoster[role].filter(n => n !== name);
+                delete metricLedgerData[role][name];
+                renderAdminRoster();
+                populateDropdowns();
+            }
+        }
+
+        // --- DROPDOWN FORM MANAGEMENT PIPELINES PLUMBING ---
+        function populateDropdowns() {
+            const lmSelect = document.getElementById('lead-lm-select');
+            const amSelect = document.getElementById('lead-am-select');
+            
+            if(!lmSelect || !amSelect) return;
+            
+            lmSelect.innerHTML = '';
+            amSelect.innerHTML = '';
+
+            managementRoster.leadManager.forEach(n => lmSelect.innerHTML += `<option value="${n}">${n}</option>`);
+            managementRoster.acqManager.forEach(n => amSelect.innerHTML += `<option value="${n}">${n}</option>`);
+
+            toggleMetricInputs();
+        }
+
+        function populateModalDropdowns(lead) {
+            const lm = document.getElementById('modal-assign-lm');
+            const am = document.getElementById('modal-assign-am');
+            const dm = document.getElementById('modal-assign-dm');
+            const tc = document.getElementById('modal-assign-tc');
+
+            lm.innerHTML = ''; am.innerHTML = ''; dm.innerHTML = ''; tc.innerHTML = '';
+
+            managementRoster.leadManager.forEach(n => lm.innerHTML += `<option value="${n}" ${lead.lm === n ? 'selected' : ''}>${n}</option>`);
+            managementRoster.acqManager.forEach(n => am.innerHTML += `<option value="${n}" ${lead.am === n ? 'selected' : ''}>${n}</option>`);
+            
+            dm.innerHTML = '<option value="">Unassigned</option>';
+            managementRoster.dispoManager.forEach(n => dm.innerHTML += `<option value="${n}" ${lead.dm === n ? 'selected' : ''}>${n}</option>`);
+            
+            tc.innerHTML = '<option value="">Unassigned</option>';
+            managementRoster.transCoordinator.forEach(n => tc.innerHTML += `<option value="${n}" ${lead.tc === n ? 'selected' : ''}>${n}</option>`);
+        }
+
+        // --- MODALS ELEMENT WINDOW CONTROLS ---
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
     </script>
-    <script>
-   // all your existing CRM code
-</script>
-
-<!-- SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-const supabaseUrl = "https://oymrnlbuslisunopmvaf.supabase.co";
-
-const supabaseKey =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95bXJubGJ1c2xpc3Vub3BtdmFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzg1NzQsImV4cCI6MjA5NjYxNDU3NH0.7Fi5v8vE9lmKY97k99gK_9RCON0af0XBhQwJQpvgLLs";
-const supabase = window.supabase.createClient(
-    supabaseUrl,
-    supabaseKey
-);
-</script>
 </body>
 </html>
