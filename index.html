@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Swift REI Insider™ | Enterprise CRM Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+    <!-- Supabase CDN added -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -463,6 +464,11 @@
             { id: 2, address: "904 West Ave, Austin TX", sellerName: "Claire Miller", sellerPhone: "(512) 555-8831", sellerEmail: "claire.m@outlook.com", titleCompany: "", market: "70% Region", stage: "underwriting", source: "Pre-Foreclosure", type: "Single Family", beds: "4+", lm: "Marcus Vance", am: "Elena Rostova", dm: "", tc: "", arv: 420000, repairs: 45000, wholesale: 25000, buffer: 52500, mao: 171500, notes: "" }
         ];
 
+        // --- SUPABASE CLIENT INITIALIZATION (ADDED) ---
+        const SUPABASE_URL = "YOUR_SUPABASE_URL";
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         let selectedLeadId = null;
 
         // On Window Load initialization
@@ -634,8 +640,8 @@ swiftequitysolutions@gmail.com
             navigator.clipboard.writeText(emailDraft.trim());
         }
 
-        // --- CORE LEADS ACTIONS ---
-        function submitNewLead() {
+        // --- CORE LEADS ACTIONS (async added + Supabase insert) ---
+        async function submitNewLead() {
             const address = document.getElementById('lead-address').value;
             if(!address) { alert('Street Address is mandatory.'); return; }
 
@@ -673,6 +679,42 @@ swiftequitysolutions@gmail.com
                 mao: computedMao,
                 notes: ""
             };
+
+            // === SUPABASE INSERT ADDED HERE (exactly as instructed) ===
+            const { data, error } = await supabase
+                .from("rei_leads_pipeline")
+                .insert([
+                    {
+                        id: crypto.randomUUID(),
+                        address: newFile.address,
+                        sellerName: newFile.sellerName,
+                        sellerPhone: newFile.sellerPhone,
+                        sellerEmail: newFile.sellerEmail,
+                        source: newFile.source,
+                        market: newFile.market,
+                        type: newFile.type,
+                        beds: newFile.beds,
+                        arv: newFile.arv,
+                        repairs: newFile.repairs,
+                        wholesale: newFile.wholesale,
+                        calculatedMao: newFile.mao,
+                        assignedLM: newFile.lm,
+                        assignedAM: newFile.am,
+                        assignedM: "Unassigned",
+                        titleCompany: "",
+                        dispoNotes: "",
+                        emd: 100,
+                        stage: newFile.stage
+                    }
+                ])
+                .select();
+
+            if (error) {
+                console.error("SAVE ERROR:", error);
+                alert("Error saving lead to Supabase. Lead not added locally.");
+                return;
+            }
+            // === END SUPABASE INSERT ===
 
             leads.push(newFile);
             closeModal('add-lead-modal');
