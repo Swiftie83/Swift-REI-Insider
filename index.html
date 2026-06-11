@@ -810,38 +810,70 @@
                 return;
             }
 
-          const { data, error } = await supabase
-    .from("rei_leads_pipeline")
-    .insert([
-        {
-            id: crypto.randomUUID(),
-            address: address,
-            sellerName: sellerName,
-            sellerPhone: sellerPhone,
-            sellerEmail: sellerEmail,
-            source: source,
-            market: market,
-            type: propType,
-            beds: beds,
-            arv: arv,
-            repairs: repairs,
-            wholesale: wholesale,
-            calculatedMao: calcs.mao,
-            assignedLM: lm,
-            assignedAM: am,
-            assignedDM: "Unassigned",
-            titleCompany: "",
-            dispoNotes: "",
-            emd: 100,
-            stage: "new"
-        }
-    ]);
-
-if (error) {
-    console.error(error);
-    alert(error.message);
-    return;
+        const { data, error } = await supabase
+.from("rei_leads_pipeline")
+.insert([
+{
+    id: crypto.randomUUID(),
+    address: address,
+    sellerName: sellerName,
+    sellerPhone: sellerPhone,
+    sellerEmail: sellerEmail,
+    source: source,
+    market: market,
+    type: propType,
+    beds: beds,
+    arv: arv,
+    repairs: repairs,
+    wholesale: wholesale,
+    calculatedMao: calcs.mao,
+    assignedL: lm,
+    assignedAM: am,
+    assignedM: "Unassigned",
+    titleCompany: "",
+    dispoNotes: "",
+    emd: 100,
+    stage: "new"
 }
+])
+.select();
+
+
+if(error){
+    console.log("SAVE ERROR:", error);
+    alert("Error saving lead");
+}else{
+    console.log("SAVED TO SUPABASE:", data);
+    alert("Lead Saved");
+}
+            async function loadLeads(){
+
+const { data, error } = await supabase
+.from("rei_leads_pipeline")
+.select("*")
+.order("created_at", { ascending:false });
+
+
+if(error){
+console.log("LOAD ERROR:", error);
+return;
+}
+
+
+console.log("LOADED LEADS:", data);
+
+
+// Example if you have a table:
+data.forEach(lead => {
+
+console.log(lead.address);
+
+});
+
+}
+
+
+window.addEventListener("load", loadLeads);
 
             closeModal('add-lead-modal');
             renderPipeline();
