@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Swift REI Insider™ | Enterprise CRM Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Supabase CDN added -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -54,6 +54,7 @@
         .pipeline-col { background-color: var(--bg-surface); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border); min-height: 530px; min-width: 270px; flex: 1; }
         .col-header { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; display: flex; justify-content: space-between; }
         
+        .cards-container { min-height: 450px; }
         .deal-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
         .deal-card:hover { transform: translateY(-2px); border-color: var(--primary); }
         .deal-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.4rem; }
@@ -96,6 +97,8 @@
         .roster-list-item:last-child { border-bottom: none; }
         .btn-delete-operator { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 2px; }
         .btn-delete-operator:hover { text-decoration: underline; }
+        
+        .loading-text { font-size: 0.9rem; color: var(--text-muted); font-style: italic; padding: 1rem; }
     </style>
 </head>
 <body>
@@ -430,6 +433,12 @@
     </div>
 
     <script>
+        // Production Supabase Initialization Credentials
+        const SUPABASE_URL = "https://oymrnlbuslisunopmvaf.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95bXJubGJ1c2xpc3Vub3BtdmFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzg1NzQsImV4cCI6MjA5NjYxNDU3NH0.7Fi5v8vE9lmKY97k99gK_9RCON0af0XBhQwJQpvgLLs";
+        
+        let supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // Structural Management Rosters Data Matrix
         let managementRoster = {
             leadManager: ["Sarah Jenkins", "Marcus Vance"],
@@ -458,32 +467,117 @@
             }
         };
 
-        // Standard Property Leads Array
-        let leads = [
-            { id: 1, address: "1428 Elm St, Detroit MI", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "Liberty Title Co.", market: "60% Region", stage: "new", source: "Tired Landlord", type: "Single Family", beds: "3", lm: "Sarah Jenkins", am: "David Ross", dm: "Chris Gable", tc: "Tanya Cross", arv: 140000, repairs: 25000, wholesale: 15000, buffer: 17500, mao: 46500, notes: "Needs full cosmetic updates." },
-            { id: 2, address: "904 West Ave, Austin TX", sellerName: "Claire Miller", sellerPhone: "(512) 555-8831", sellerEmail: "claire.m@outlook.com", titleCompany: "", market: "70% Region", stage: "underwriting", source: "Pre-Foreclosure", type: "Single Family", beds: "4+", lm: "Marcus Vance", am: "Elena Rostova", dm: "", tc: "", arv: 420000, repairs: 45000, wholesale: 25000, buffer: 52500, mao: 171500, notes: "" }
-        ];
+        // Standard Dynamic Property Leads Array
+        let leads = [];
 
-        // --- SUPABASE CLIENT INITIALIZATION (ADDED) ---
-        const SUPABASE_URL = "YOUR_SUPABASE_URL";
-        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Pre-hydration seed array used if the remote database table is freshly provisioned
+        const localSeedArray = [
+            { address: "1428 Elm St, Detroit MI", sellerName: "Robert Taylor", sellerPhone: "(313) 555-0192", sellerEmail: "rtaylor@gmail.com", titleCompany: "Liberty Title Co.", market: "60% Region", stage: "new", source: "Tired Landlord", type: "Single Family", beds: "3", lm: "Sarah Jenkins", am: "David Ross", dm: "", tc: "", arv: 140000, repairs: 25000, wholesale: 15000, buffer: 17500, mao: 46500, notes: "Needs full cosmetic updates." },
+            { address: "904 West Ave, Austin TX", sellerName: "Claire Miller", sellerPhone: "(512) 555-8831", sellerEmail: "claire.m@outlook.com", titleCompany: "", market: "70% Region", stage: "underwriting", source: "Pre-Foreclosure", type: "Single Family", beds: "4+", lm: "Marcus Vance", am: "Elena Rostova", dm: "", tc: "", arv: 420000, repairs: 45000, wholesale: 25000, buffer: 52500, mao: 171500, notes: "" }
+        ];
 
         let selectedLeadId = null;
 
-        // On Window Load initialization
+        // Window Load sync engine initialization
         window.addEventListener('DOMContentLoaded', () => {
             initApp();
         });
 
-        function initApp() {
+        async function initApp() {
             lucide.createIcons();
             populateDropdowns();
-            renderPipeline();
-            renderMatrices();
-            renderDispoDesk();
-            renderAdminRoster();
             runLiveUnderwritingCalculation();
+            await syncLeadsFromSupabase();
+        }
+
+        // --- SUPABASE LIVE INTEGRATION DATA SYNC ENGINE ---
+        async function syncLeadsFromSupabase() {
+            showLoadingIndicators();
+            try {
+                const { data, error } = await supabase
+                    .from("rei_leads_pipeline")
+                    .select("*");
+
+                if (error) {
+                    console.error("Supabase data download error:", error);
+                    return;
+                }
+
+                // If remote table is brand new/empty, hydrate it with default seeds so the user isn't looking at a shell
+                if (!data || data.length === 0) {
+                    console.log("Database empty. Commencing background seed hydration sequence...");
+                    for (const seed of localSeedArray) {
+                        await supabase.from("rei_leads_pipeline").insert([{
+                            id: crypto.randomUUID(),
+                            address: seed.address,
+                            sellerName: seed.sellerName,
+                            sellerPhone: seed.sellerPhone,
+                            sellerEmail: seed.sellerEmail,
+                            source: seed.source,
+                            market: seed.market,
+                            type: seed.type,
+                            beds: seed.beds,
+                            arv: seed.arv,
+                            repairs: seed.repairs,
+                            wholesale: seed.wholesale,
+                            calculatedMao: seed.mao,
+                            assignedLM: seed.lm,
+                            assignedAM: seed.am,
+                            assignedM: "Unassigned",
+                            titleCompany: seed.titleCompany,
+                            dispoNotes: seed.notes,
+                            emd: 100,
+                            stage: seed.stage
+                        }]);
+                    }
+                    // Re-fetch after seeding completes
+                    const reFetch = await supabase.from("rei_leads_pipeline").select("*");
+                    mapDatabaseRowsToLeads(reFetch.data || []);
+                } else {
+                    mapDatabaseRowsToLeads(data);
+                }
+            } catch (err) {
+                console.error("Critical database pipeline communication error:", err);
+            } finally {
+                renderPipeline();
+                renderMatrices();
+                renderDispoDesk();
+                renderAdminRoster();
+            }
+        }
+
+        function mapDatabaseRowsToLeads(rows) {
+            leads = rows.map(row => ({
+                id: row.id, // Sourced from Supabase text UUID fields cleanly
+                address: row.address || "",
+                sellerName: row.sellerName || "-",
+                sellerPhone: row.sellerPhone || "-",
+                sellerEmail: row.sellerEmail || "-",
+                titleCompany: row.titleCompany || "",
+                market: row.market || "60% Region",
+                stage: row.stage || "new",
+                source: row.source || "Tired Landlord",
+                type: row.type || "Single Family",
+                beds: row.beds || "3",
+                lm: row.assignedLM || "",
+                am: row.assignedAM || "",
+                dm: row.assignedM !== "Unassigned" ? row.assignedM : "",
+                tc: "", 
+                arv: Number(row.arv) || 0,
+                repairs: Number(row.repairs) || 0,
+                wholesale: Number(row.wholesale) || 0,
+                buffer: Math.round((Number(row.arv) || 0) * 0.125),
+                mao: Number(row.calculatedMao) || 0,
+                notes: row.dispoNotes || ""
+            }));
+        }
+
+        function showLoadingIndicators() {
+            const tracks = ["new", "underwriting", "offer", "contract", "closed"];
+            tracks.forEach(track => {
+                const el = document.querySelector(`#col-${track} .cards-container`);
+                if(el) el.innerHTML = `<div class="loading-text">Syncing live...</div>`;
+            });
         }
 
         function switchView(viewName) {
@@ -491,7 +585,8 @@
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             
             document.getElementById(`view-${viewName}`).classList.add('active');
-            const clickedBtn = document.getElementById(`btn-nav-${viewName}`) || event.currentTarget;
+            
+            const clickedBtn = document.getElementById(`btn-nav-${viewName}`);
             if(clickedBtn) clickedBtn.classList.add('active');
 
             if(viewName === 'pipeline') renderPipeline();
@@ -510,13 +605,14 @@
                 closed: document.querySelector('#col-closed .cards-container')
             };
 
-            // Clear previous UI entries
+            // Clear entries
             Object.values(containers).forEach(c => { if(c) c.innerHTML = ''; });
 
             let counts = { new: 0, underwriting: 0, offer: 0, contract: 0, closed: 0 };
             let totalVolume = 0;
 
             leads.forEach(lead => {
+                if(!counts.hasOwnProperty(lead.stage)) lead.stage = "new";
                 counts[lead.stage]++;
                 if (lead.stage === 'closed') {
                     totalVolume += Number(lead.wholesale || 0);
@@ -539,7 +635,6 @@
                 if(containers[lead.stage]) containers[lead.stage].appendChild(card);
             });
 
-            // Update Metrics Display Counters
             document.getElementById('stat-active').innerText = leads.length;
             document.getElementById('stat-volume').innerText = '$' + totalVolume.toLocaleString();
             
@@ -568,23 +663,20 @@
                 document.getElementById('live-mao-display').style.color = "var(--primary)";
             }
 
-            // Extract numeric modifier percentages
             let percentage = 0.60;
             if(marketSelector.includes("50%")) percentage = 0.50;
             if(marketSelector.includes("70%")) percentage = 0.70;
             if(marketSelector.includes("80%")) percentage = 0.80;
             if(marketSelector.includes("85%")) percentage = 0.85;
 
-            // Standard Buyer Margin Buffer at constant 12.5%
             const buffer = Math.round(arv * 0.125);
             document.getElementById('lead-buffer').value = buffer;
 
-            // Operational Core Real Estate Formula 
             const mao = Math.round((arv * percentage) - repairs - wholesale - buffer);
             document.getElementById('live-mao-display').innerText = mao > 0 ? '$' + mao.toLocaleString() : '$0';
         }
 
-        // --- CREATIVE REIS OFFER GENERATOR SYSTEM BUTTON ---
+        // --- CREATIVE REIS OFFER GENERATOR SYSTEM ---
         function triggerOfferGenerator(type) {
             let address, arv, repairs, wholesale, mao, seller;
 
@@ -607,7 +699,7 @@
                 seller = lead.sellerName;
             }
 
-            const principalMonthly = Math.round(mao / 120); // Computed example logic for principal-only 10yr schedule amortized spread
+            const principalMonthly = Math.round(mao / 120); 
 
             const emailDraft = `
 SUBJECT: Clean Purchase Offer - ${address}
@@ -616,7 +708,7 @@ Dear ${seller},
 
 We appreciate the opportunity to submit our formal buying proposal for the property located at ${address}. 
 
-Based on our asset evaluation analytics, Swift Equity Solutions LLC is prepared to advance under the following strict execution parameters:
+Based on our asset evaluation analytics, Swift Equity Solutions LLC is prepared to advance under the following purchase parameters:
 
 1. Purchase Structure Options:
    - Cash Purchase Term Option: Maximum Allowable Valuation Allocation of $${mao.toLocaleString()} Net to Seller.
@@ -640,7 +732,7 @@ swiftequitysolutions@gmail.com
             navigator.clipboard.writeText(emailDraft.trim());
         }
 
-        // --- CORE LEADS ACTIONS (async added + Supabase insert) ---
+        // --- CORE LEADS ACTIONS & LIVE DB WRITES ---
         async function submitNewLead() {
             const address = document.getElementById('lead-address').value;
             if(!address) { alert('Street Address is mandatory.'); return; }
@@ -654,11 +746,10 @@ swiftequitysolutions@gmail.com
 
             const textMao = document.getElementById('live-mao-display').innerText;
             const computedMao = Number(textMao.replace(/[^0-9.-]+/g,"")) || 0;
-
-            const nextId = leads.length > 0 ? Math.max(...leads.map(l => l.id)) + 1 : 1;
+            const generatedUUID = crypto.randomUUID();
             
             const newFile = {
-                id: nextId,
+                id: generatedUUID,
                 address: address,
                 sellerName: document.getElementById('lead-seller-name').value || "-",
                 sellerPhone: document.getElementById('lead-seller-phone').value || "-",
@@ -680,47 +771,45 @@ swiftequitysolutions@gmail.com
                 notes: ""
             };
 
-            // === SUPABASE INSERT ADDED HERE (exactly as instructed) ===
-            const { data, error } = await supabase
-                .from("rei_leads_pipeline")
-                .insert([
-                    {
-                        id: crypto.randomUUID(),
-                        address: newFile.address,
-                        sellerName: newFile.sellerName,
-                        sellerPhone: newFile.sellerPhone,
-                        sellerEmail: newFile.sellerEmail,
-                        source: newFile.source,
-                        market: newFile.market,
-                        type: newFile.type,
-                        beds: newFile.beds,
-                        arv: newFile.arv,
-                        repairs: newFile.repairs,
-                        wholesale: newFile.wholesale,
-                        calculatedMao: newFile.mao,
-                        assignedLM: newFile.lm,
-                        assignedAM: newFile.am,
-                        assignedM: "Unassigned",
-                        titleCompany: "",
-                        dispoNotes: "",
-                        emd: 100,
-                        stage: newFile.stage
-                    }
-                ])
-                .select();
+            // Dynamic live Supabase Insertion Engine Block
+            try {
+                const { data, error } = await supabase
+                    .from("rei_leads_pipeline")
+                    .insert([
+                        {
+                            id: generatedUUID,
+                            address: newFile.address,
+                            sellerName: newFile.sellerName,
+                            sellerPhone: newFile.sellerPhone,
+                            sellerEmail: newFile.sellerEmail,
+                            source: newFile.source,
+                            market: newFile.market,
+                            type: newFile.type,
+                            beds: newFile.beds,
+                            arv: newFile.arv,
+                            repairs: newFile.repairs,
+                            wholesale: newFile.wholesale,
+                            calculatedMao: newFile.mao,
+                            assignedLM: newFile.lm,
+                            assignedAM: newFile.am,
+                            assignedM: "Unassigned",
+                            titleCompany: "",
+                            dispoNotes: "",
+                            emd: 100,
+                            stage: newFile.stage
+                        }
+                    ]);
 
-            if (error) {
-                console.error("SAVE ERROR:", error);
-                alert("Error saving lead to Supabase. Lead not added locally.");
-                return;
+                if(error) console.error("SUPABASE CORE PERSISTENCE FAULT:", error);
+            } catch(dbErr) {
+                console.error("Failed executing remote upload task:", dbErr);
             }
-            // === END SUPABASE INSERT ===
 
             leads.push(newFile);
             closeModal('add-lead-modal');
             renderPipeline();
             
-            // Clear Inputs Form Array
+            // Clear Form
             document.getElementById('lead-address').value = '';
             document.getElementById('lead-seller-name').value = '';
             document.getElementById('lead-seller-phone').value = '';
@@ -747,10 +836,8 @@ swiftequitysolutions@gmail.com
                 <span class="deal-tag tag-role">${lead.type} (${lead.beds} Bed)</span>
             `;
 
-            // Populate mapping drops selections elements
             populateModalDropdowns(lead);
 
-            // Conditional layout options handling display elements
             const dispoPanel = document.getElementById('modal-dispo-tc-assign-box');
             const dispoNotes = document.getElementById('dispo-notes-panel');
             
@@ -767,25 +854,45 @@ swiftequitysolutions@gmail.com
             openModal('deal-modal');
         }
 
-        function saveLeadManagerAssignments() {
+        async function saveLeadManagerAssignments() {
             const lead = leads.find(l => l.id === selectedLeadId);
             if(!lead) return;
 
             lead.lm = document.getElementById('modal-assign-lm').value;
             lead.am = document.getElementById('modal-assign-am').value;
             
+            let updatePayload = {
+                assignedLM: lead.lm,
+                assignedAM: lead.am
+            };
+
             if(['contract', 'closed'].includes(lead.stage)) {
                 lead.dm = document.getElementById('modal-assign-dm').value;
                 lead.tc = document.getElementById('modal-assign-tc').value;
                 lead.titleCompany = document.getElementById('modal-dispo-title-co').value;
                 lead.notes = document.getElementById('modal-dispo-notes').value;
+                
+                updatePayload.assignedM = lead.dm || "Unassigned";
+                updatePayload.titleCompany = lead.titleCompany;
+                updatePayload.dispoNotes = lead.notes;
+            }
+
+            // Sync structural parameters up to database table rows
+            try {
+                await supabase
+                    .from("rei_leads_pipeline")
+                    .update(updatePayload)
+                    .eq("id", lead.id);
+            } catch(err) {
+                console.error("Database tracking rewrite failure:", err);
             }
 
             closeModal('deal-modal');
             renderPipeline();
+            renderDispoDesk();
         }
 
-        function adjustPipelineDirection(dir) {
+        async function adjustPipelineDirection(dir) {
             const tracks = ["new", "underwriting", "offer", "contract", "closed"];
             const lead = leads.find(l => l.id === selectedLeadId);
             if(!lead) return;
@@ -796,21 +903,45 @@ swiftequitysolutions@gmail.com
             if(nextIndex >= 0 && nextIndex < tracks.length) {
                 lead.stage = tracks[nextIndex];
                 
-                // Prefill corporate defaults rules logic mapping elements
                 if(lead.stage === 'contract' && !lead.titleCompany) {
                     lead.titleCompany = "Liberty Title Co.";
                 }
                 
+                try {
+                    await supabase
+                        .from("rei_leads_pipeline")
+                        .update({ 
+                            stage: lead.stage,
+                            titleCompany: lead.titleCompany
+                        })
+                        .eq("id", lead.id);
+                } catch(err) {
+                    console.error("Stage transmission update failure:", err);
+                }
+                
                 openLeadProfile(lead.id);
                 renderPipeline();
+                renderDispoDesk();
             }
         }
 
-        function deleteActiveLeadFile() {
-            if(confirm("Confirm deletion of this property lead file from system active index registry?")) {
+        async function deleteActiveLeadFile() {
+            if(confirm("Confirm deletion of this property lead file from live database index registers?")) {
+                const leadToDelete = leads.find(l => l.id === selectedLeadId);
+                if(leadToDelete) {
+                    try {
+                        await supabase
+                            .from("rei_leads_pipeline")
+                            .delete()
+                            .eq("id", leadToDelete.id);
+                    } catch(err) {
+                        console.error("Purge operations execution anomaly:", err);
+                    }
+                }
                 leads = leads.filter(l => l.id !== selectedLeadId);
                 closeModal('deal-modal');
                 renderPipeline();
+                renderDispoDesk();
             }
         }
 
@@ -846,17 +977,23 @@ swiftequitysolutions@gmail.com
                 transCoordinator: ["EMD Verifications", "Title Clearances Audit", "Closings Realized"]
             };
 
-            document.getElementById('lbl-field-1').innerText = labels[role][0];
-            document.getElementById('lbl-field-2').innerText = labels[role][1];
-            document.getElementById('lbl-field-3').innerText = labels[role][2];
-            document.getElementById('field-box-3').style.display = 'block';
+            const l1 = document.getElementById('lbl-field-1');
+            const l2 = document.getElementById('lbl-field-2');
+            const l3 = document.getElementById('lbl-field-3');
+            const fb3 = document.getElementById('field-box-3');
 
-            // Populate the target names dropdown
+            if(l1) l1.innerText = labels[role][0];
+            if(l2) l2.innerText = labels[role][1];
+            if(l3) l3.innerText = labels[role][2];
+            if(fb3) fb3.style.display = 'block';
+
             const nameSelect = document.getElementById('metric-manager-name');
-            nameSelect.innerHTML = '';
-            managementRoster[role].forEach(n => {
-                nameSelect.innerHTML += `<option value="${n}">${n}</option>`;
-            });
+            if(nameSelect) {
+                nameSelect.innerHTML = '';
+                managementRoster[role].forEach(n => {
+                    nameSelect.innerHTML += `<option value="${n}">${n}</option>`;
+                });
+            }
         }
 
         function submitRoleActivityMetrics() {
@@ -878,12 +1015,13 @@ swiftequitysolutions@gmail.com
         // --- DISPOSITION DESK UI VIEW ---
         function renderDispoDesk() {
             const container = document.getElementById('dispo-cards-container');
+            if(!container) return;
             container.innerHTML = '';
 
             const dispoInventory = leads.filter(l => ['contract', 'closed'].includes(l.stage));
 
             if(dispoInventory.length === 0) {
-                container.innerHTML = `<p style="color:var(--text-muted);">No active inventory currently logged under contract tracking stage tier structures.</p>`;
+                container.innerHTML = `<p style="color:var(--text-muted);">No active inventory currently logged under contract tracking stage structures.</p>`;
                 return;
             }
 
@@ -893,14 +1031,14 @@ swiftequitysolutions@gmail.com
                 card.innerHTML = `
                     <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">${deal.address}</h3>
                     <div style="font-size:0.85rem; margin-bottom:0.75rem; color:var(--text-muted);">
-                        Assigned DM: <strong style="color:#fff;">${deal.dm || "Unassigned"}</strong> | TC: <strong style="color:#fff;">${deal.tc || "Unassigned"}</strong>
+                        Assigned DM: <strong style="color:#fff;">${deal.dm || "Unassigned"}</strong>
                     </div>
                     <div style="background:rgba(0,0,0,0.2); padding:0.75rem; border-radius:0.4rem; font-size:0.85rem; margin-bottom:1rem; border:1px solid var(--border);">
                         <div style="margin-bottom:0.25rem;"><span style="color:var(--text-muted)">Preferred Settlement Title:</span> <br><strong>${deal.titleCompany || "Swift Contract Target Default"}</strong></div>
                         <div><span style="color:var(--text-muted)">Latest Dispo Dispatch Log Updates:</span><br> <span style="font-style:italic;">${deal.notes || "No dispo blast notes logged yet."}</span></div>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:0.8rem; color:var(--text-muted);">Expected Net Wholesale Assignment Revenue Profit Target Margin:</span>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Expected Net Wholesale Revenue:</span>
                         <strong style="color:var(--primary); font-size:1.1rem;">$${deal.wholesale.toLocaleString()}</strong>
                     </div>
                 `;
@@ -911,6 +1049,7 @@ swiftequitysolutions@gmail.com
         // --- SYSTEM ADMIN CONFIGS ---
         function renderAdminRoster() {
             const container = document.getElementById('admin-roster-display');
+            if(!container) return;
             container.innerHTML = '';
 
             const roles = {
@@ -927,15 +1066,17 @@ swiftequitysolutions@gmail.com
                 container.appendChild(card);
 
                 const listBox = document.getElementById(`roster-box-${roleKey}`);
-                managementRoster[roleKey].forEach(name => {
-                    const item = document.createElement('div');
-                    item.className = 'roster-list-item';
-                    item.innerHTML = `
-                        <span style="font-size:0.9rem; color:#fff;">${name}</span>
-                        <button class="btn-delete-operator" onclick="purgeSystemOperator('${roleKey}', '${name}')"><i data-lucide="user-x" style="width:14px;"></i> Remove</button>
-                    `;
-                    listBox.appendChild(item);
-                });
+                if(listBox) {
+                    managementRoster[roleKey].forEach(name => {
+                        const item = document.createElement('div');
+                        item.className = 'roster-list-item';
+                        item.innerHTML = `
+                            <span style="font-size:0.9rem; color:#fff;">${name}</span>
+                            <button class="btn-delete-operator" onclick="purgeSystemOperator('${roleKey}', '${name}')"><i data-lucide="user-x" style="width:14px;"></i> Remove</button>
+                        `;
+                        listBox.appendChild(item);
+                    });
+                }
             });
             lucide.createIcons();
         }
@@ -969,7 +1110,7 @@ swiftequitysolutions@gmail.com
             }
         }
 
-        // --- DROPDOWN FORM MANAGEMENT PIPELINES PLUMBING ---
+        // --- DROPDOWN PLUMBING ---
         function populateDropdowns() {
             const lmSelect = document.getElementById('lead-lm-select');
             const amSelect = document.getElementById('lead-am-select');
@@ -991,6 +1132,8 @@ swiftequitysolutions@gmail.com
             const dm = document.getElementById('modal-assign-dm');
             const tc = document.getElementById('modal-assign-tc');
 
+            if(!lm || !am || !dm || !tc) return;
+
             lm.innerHTML = ''; am.innerHTML = ''; dm.innerHTML = ''; tc.innerHTML = '';
 
             managementRoster.leadManager.forEach(n => lm.innerHTML += `<option value="${n}" ${lead.lm === n ? 'selected' : ''}>${n}</option>`);
@@ -1003,7 +1146,7 @@ swiftequitysolutions@gmail.com
             managementRoster.transCoordinator.forEach(n => tc.innerHTML += `<option value="${n}" ${lead.tc === n ? 'selected' : ''}>${n}</option>`);
         }
 
-        // --- MODALS ELEMENT WINDOW CONTROLS ---
+        // --- MODALS ENGINE ---
         function openModal(id) {
             document.getElementById(id).classList.add('active');
         }
