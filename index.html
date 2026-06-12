@@ -185,7 +185,7 @@
                     
                     <div class="form-group" id="field-box-1"><label id="lbl-field-1">Stat 1</label><input type="number" id="val-field-1" value="0"></div>
                     <div class="form-group" id="field-box-2"><label id="lbl-field-2">Stat 2</label><input type="number" id="val-field-2" value="0"></div>
-                    <div class="form-group" id="field-box-3" style="display:none;"><label id="lbl-field-3">Stat 3</label><input type="number" id="val-field-3" value="0"></div>
+                    <div class="form-group" id="field-box-3"><label id="lbl-field-3">Stat 3</label><input type="number" id="val-field-3" value="0"></div>
                     
                     <div class="form-group">
                         <button style="background:var(--accent); color:#fff; padding:0.65rem; border:none; border-radius:0.5rem; width:100%; cursor:pointer; font-weight:600;" onclick="submitRoleActivityMetrics()">Push Operational Stats</button>
@@ -318,14 +318,14 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
                 <div class="form-group">
                     <label>Property Structure Type</label>
-                    <select id="lead-prop-type">
+                    <select id="lead-prop-type" onchange="runLiveUnderwritingCalculation()">
                         <option value="Single Family">Single Family Home</option>
                         <option value="Multi-Family">Multi-Family Space</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Bedroom Count Matrix</label>
-                    <select id="lead-beds">
+                    <select id="lead-beds" onchange="runLiveUnderwritingCalculation()">
                         <option value="2">2 Bedrooms</option>
                         <option value="3" selected>3 Bedrooms</option>
                         <option value="4+">4+ Bedrooms</option>
@@ -956,204 +956,4 @@ swiftequitysolutions@gmail.com
 
                 const profiles = managementRoster[role];
                 profiles.forEach(name => {
-                    const stats = metricLedgerData[role][name] || { f1: 0, f2: 0, f3: 0 };
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td style="font-weight:600; color:#fff;">${name}</td>
-                        <td>${stats.f1}</td>
-                        <td>${stats.f2}</td>
-                        <td>${stats.f3}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            });
-        }
-
-        function toggleMetricInputs() {
-            const role = document.getElementById('metric-role-select').value;
-            const labels = {
-                leadManager: ["Inbound Calls Connect", "Outbound Leads Sourced", "Leads Qualified Matrix"],
-                acqManager: ["Offers Dispatched", "Follow-ups Completed", "Contracts Secured"],
-                dispoManager: ["Cash Buyer Blasts", "Walkthroughs Scheduled", "Deals Assigned"],
-                transCoordinator: ["EMD Verifications", "Title Clearances Audit", "Closings Realized"]
-            };
-
-            const l1 = document.getElementById('lbl-field-1');
-            const l2 = document.getElementById('lbl-field-2');
-            const l3 = document.getElementById('lbl-field-3');
-            const fb3 = document.getElementById('field-box-3');
-
-            if(l1) l1.innerText = labels[role][0];
-            if(l2) l2.innerText = labels[role][1];
-            if(l3) l3.innerText = labels[role][2];
-            if(fb3) fb3.style.display = 'block';
-
-            const nameSelect = document.getElementById('metric-manager-name');
-            if(nameSelect) {
-                nameSelect.innerHTML = '';
-                managementRoster[role].forEach(n => {
-                    nameSelect.innerHTML += `<option value="${n}">${n}</option>`;
-                });
-            }
-        }
-
-        function submitRoleActivityMetrics() {
-            const role = document.getElementById('metric-role-select').value;
-            const name = document.getElementById('metric-manager-name').value;
-            
-            if(!name) return;
-
-            metricLedgerData[role][name] = {
-                f1: Number(document.getElementById('val-field-1').value) || 0,
-                f2: Number(document.getElementById('val-field-2').value) || 0,
-                f3: Number(document.getElementById('val-field-3').value) || 0
-            };
-
-            renderMatrices();
-            alert(`Operational telemetry matrix tracking successfully saved for ${name}`);
-        }
-
-        // --- DISPOSITION DESK UI VIEW ---
-        function renderDispoDesk() {
-            const container = document.getElementById('dispo-cards-container');
-            if(!container) return;
-            container.innerHTML = '';
-
-            const dispoInventory = leads.filter(l => ['contract', 'closed'].includes(l.stage));
-
-            if(dispoInventory.length === 0) {
-                container.innerHTML = `<p style="color:var(--text-muted);">No active inventory currently logged under contract tracking stage structures.</p>`;
-                return;
-            }
-
-            dispoInventory.forEach(deal => {
-                const card = document.createElement('div');
-                card.className = 'dispo-card';
-                card.innerHTML = `
-                    <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">${deal.address}</h3>
-                    <div style="font-size:0.85rem; margin-bottom:0.75rem; color:var(--text-muted);">
-                        Assigned DM: <strong style="color:#fff;">${deal.dm || "Unassigned"}</strong>
-                    </div>
-                    <div style="background:rgba(0,0,0,0.2); padding:0.75rem; border-radius:0.4rem; font-size:0.85rem; margin-bottom:1rem; border:1px solid var(--border);">
-                        <div style="margin-bottom:0.25rem;"><span style="color:var(--text-muted)">Preferred Settlement Title:</span> <br><strong>${deal.titleCompany || "Swift Contract Target Default"}</strong></div>
-                        <div><span style="color:var(--text-muted)">Latest Dispo Dispatch Log Updates:</span><br> <span style="font-style:italic;">${deal.notes || "No dispo blast notes logged yet."}</span></div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:0.8rem; color:var(--text-muted);">Expected Net Wholesale Revenue:</span>
-                        <strong style="color:var(--primary); font-size:1.1rem;">$${deal.wholesale.toLocaleString()}</strong>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // --- SYSTEM ADMIN CONFIGS ---
-        function renderAdminRoster() {
-            const container = document.getElementById('admin-roster-display');
-            if(!container) return;
-            container.innerHTML = '';
-
-            const roles = {
-                leadManager: "Lead Manager (LM)",
-                acqManager: "Acquisitions Manager (AM)",
-                dispoManager: "Disposition Manager (DM)",
-                transCoordinator: "Transaction Coordinator (TC)"
-            };
-
-            Object.keys(managementRoster).forEach(roleKey => {
-                const card = document.createElement('div');
-                card.className = 'roster-card';
-                card.innerHTML = `<h3>${roles[roleKey]}</h3><div class="roster-list-box" id="roster-box-${roleKey}"></div>`;
-                container.appendChild(card);
-
-                const listBox = document.getElementById(`roster-box-${roleKey}`);
-                if(listBox) {
-                    managementRoster[roleKey].forEach(name => {
-                        const item = document.createElement('div');
-                        item.className = 'roster-list-item';
-                        item.innerHTML = `
-                            <span style="font-size:0.9rem; color:#fff;">${name}</span>
-                            <button class="btn-delete-operator" onclick="purgeSystemOperator('${roleKey}', '${name}')"><i data-lucide="user-x" style="width:14px;"></i> Remove</button>
-                        `;
-                        listBox.appendChild(item);
-                    });
-                }
-            });
-            lucide.createIcons();
-        }
-
-        function addNewManagerToDatabase() {
-            const name = document.getElementById('admin-manager-name').value.trim();
-            const role = document.getElementById('admin-manager-role').value;
-
-            if(!name) { alert("Personnel Name criteria input missing."); return; }
-
-            if(!managementRoster[role].includes(name)) {
-                managementRoster[role].push(name);
-                if(!metricLedgerData[role][name]) {
-                    metricLedgerData[role][name] = { f1: 0, f2: 0, f3: 0 };
-                }
-                document.getElementById('admin-manager-name').value = '';
-                renderAdminRoster();
-                populateDropdowns();
-                alert(`Corporate Operator profile created: Written profile mapping for ${name} inside database index entries.`);
-            } else {
-                alert("Operator entity profile registration collision detected: Name identity exists.");
-            }
-        }
-
-        function purgeSystemOperator(role, name) {
-            if(confirm(`Confirm operational purging of agent profile: ${name}?`)) {
-                managementRoster[role] = managementRoster[role].filter(n => n !== name);
-                delete metricLedgerData[role][name];
-                renderAdminRoster();
-                populateDropdowns();
-            }
-        }
-
-        // --- DROPDOWN PLUMBING ---
-        function populateDropdowns() {
-            const lmSelect = document.getElementById('lead-lm-select');
-            const amSelect = document.getElementById('lead-am-select');
-            
-            if(!lmSelect || !amSelect) return;
-            
-            lmSelect.innerHTML = '';
-            amSelect.innerHTML = '';
-
-            managementRoster.leadManager.forEach(n => lmSelect.innerHTML += `<option value="${n}">${n}</option>`);
-            managementRoster.acqManager.forEach(n => amSelect.innerHTML += `<option value="${n}">${n}</option>`);
-
-            toggleMetricInputs();
-        }
-
-        function populateModalDropdowns(lead) {
-            const lm = document.getElementById('modal-assign-lm');
-            const am = document.getElementById('modal-assign-am');
-            const dm = document.getElementById('modal-assign-dm');
-            const tc = document.getElementById('modal-assign-tc');
-
-            if(!lm || !am || !dm || !tc) return;
-
-            lm.innerHTML = ''; am.innerHTML = ''; dm.innerHTML = ''; tc.innerHTML = '';
-
-            managementRoster.leadManager.forEach(n => lm.innerHTML += `<option value="${n}" ${lead.lm === n ? 'selected' : ''}>${n}</option>`);
-            managementRoster.acqManager.forEach(n => am.innerHTML += `<option value="${n}" ${lead.am === n ? 'selected' : ''}>${n}</option>`);
-            
-            dm.innerHTML = '<option value="">Unassigned</option>';
-            managementRoster.dispoManager.forEach(n => dm.innerHTML += `<option value="${n}" ${lead.dm === n ? 'selected' : ''}>${n}</option>`);
-            
-            tc.innerHTML = '<option value="">Unassigned</option>';
-            managementRoster.transCoordinator.forEach(n => tc.innerHTML += `<option value="${n}" ${lead.tc === n ? 'selected' : ''}>${n}</option>`);
-        }
-
-        // --- MODALS ENGINE ---
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-    </script>
-</body>
-</html>
+                    const stats = metricLedgerData[role][name] || { f1:
